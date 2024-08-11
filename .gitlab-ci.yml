@@ -53,7 +53,7 @@ unit-test-job:   # This job runs in the test stage.
     expire_in: 1 week  # Define how long artifacts should be kept
 
 # Job to run CDK tests
-cdk_test:
+# cdk_test:
   # stage: test
   # before_script:
   #   - npm install -g aws-cdk  # Install AWS CDK globally
