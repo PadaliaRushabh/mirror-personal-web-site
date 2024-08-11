@@ -19,7 +19,7 @@
 image: node:18-alpine
 
 variables:
-  NODE_ENV: 'production'
+  NODE_ENV: 'dev'
   TS_NODE_PROJECT: './tsconfig.json'
 
 
