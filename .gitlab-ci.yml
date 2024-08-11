@@ -54,7 +54,6 @@ build-job:       # This job runs in the build stage, which runs first.
 #     - echo "No lint issues found."
 
 deploy-job: # This job runs in the deploy stage.
-deploy:
   stage: deploy
   script:
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
