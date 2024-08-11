@@ -9,7 +9,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     const testingLambda = new Function(this, 'TestLambda', {
       functionName: 'TestLambda',
       runtime: Runtime.PYTHON_3_9,
-      code: new AssetCode('resources/lambdas/testing-lambda'),
+      code: new AssetCode('resources/lambdas/testing-lambda.py'),
       handler: 'index.handler',
       environment: {
         "LOG_LEVEL": "INFO"
