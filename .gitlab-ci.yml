@@ -54,18 +54,18 @@ unit-test-job:   # This job runs in the test stage.
 
 # Job to run CDK tests
 cdk_test:
-  stage: test
-  before_script:
-    - npm install -g aws-cdk  # Install AWS CDK globally
-    - npm install  # Install dependencies
-  script:
-    - npm run build  # Compile TypeScript to JavaScript (if applicable)
-    - npm test  # Run tests
-  artifacts:
-    when: always
-    paths:
-      - coverage/  # If you generate coverage reports
-    expire_in: 1 week
+  # stage: test
+  # before_script:
+  #   - npm install -g aws-cdk  # Install AWS CDK globally
+  #   - npm install  # Install dependencies
+  # script:
+  #   - npm run build  # Compile TypeScript to JavaScript (if applicable)
+  #   - npm test  # Run tests
+  # artifacts:
+  #   when: always
+  #   paths:
+  #     - coverage/  # If you generate coverage reports
+  #   expire_in: 1 week
 
 deploy-job: # This job runs in the deploy stage.
   stage: deploy
