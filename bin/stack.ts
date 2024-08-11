@@ -3,4 +3,7 @@ import * as cdk from 'aws-cdk-lib';
 import { PersonalWebSiteStack } from '../lib/stack';
 
 const app = new cdk.App();
-new PersonalWebSiteStack(app, 'PersonalWebSiteStack');
+
+const env = app.node.tryGetContext('environment')
+
+new PersonalWebSiteStack(app, 'PersonalWebSiteStack', {"env":env});
