@@ -52,12 +52,20 @@ unit-test-job:   # This job runs in the test stage.
       - .tox/  # Store the Tox environment and results as artifacts
     expire_in: 1 week  # Define how long artifacts should be kept
 
-# lint-test-job:   # This job also runs in the test stage.
-#   stage: test    # It can run at the same time as unit-test-job (in parallel).
-#   script:
-#     - echo "Linting code... This will take about 10 seconds."
-#     - sleep 10
-#     - echo "No lint issues found."
+# Job to run CDK tests
+cdk_test:
+  stage: test
+  before_script:
+    - npm install -g aws-cdk  # Install AWS CDK globally
+    - npm install  # Install dependencies
+  script:
+    - npm run build  # Compile TypeScript to JavaScript (if applicable)
+    - npm test  # Run tests
+  artifacts:
+    when: always
+    paths:
+      - coverage/  # If you generate coverage reports
+    expire_in: 1 week
 
 deploy-job: # This job runs in the deploy stage.
   stage: deploy

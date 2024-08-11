@@ -1,11 +1,11 @@
 module.exports = {
     testEnvironment: "node",
-    roots: ["<rootDir>/test"],
+    roots: ["<rootDir>/tests/cdk-test"],
     transform: {
       "^.+\\.tsx?$": "ts-jest"
     },
     moduleFileExtensions: ["ts", "tsx", "js"],
     coverageDirectory: "coverage",
-    testMatch: ["**/__tests__/**/*.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"]
+    testMatch: [    "**/?(*.)+(spec|test).[jt]s?(x)"  ]
   };
   
