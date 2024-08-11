@@ -11,3 +11,6 @@ package-lock.json
 src/package-lock.json
 src/Add/package-lock.json
 src/Multiply/package-lock.json
+
+# Test
+__pycache__
