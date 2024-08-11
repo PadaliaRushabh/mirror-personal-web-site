@@ -6,6 +6,8 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
+import { BlockPublicAccess, BucketAccessControl } from "aws-cdk-lib/aws-s3";
+
 
 export class PersonalWebSiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -16,7 +18,8 @@ export class PersonalWebSiteStack extends cdk.Stack {
     // Create an S3 bucket for static website hosting
     const websiteBucket = new s3.Bucket(this, `pws-${ENVIRONMENT}`, {
       websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
+      accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
