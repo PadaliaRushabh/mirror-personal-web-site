@@ -1,7 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { PersonalWebSiteStack } from '../../lib/stack';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 
 test('Lambda Function Created', () => {
   const app = new cdk.App();
@@ -13,6 +12,6 @@ test('Lambda Function Created', () => {
   // Assert that a Lambda function is created
   template.hasResourceProperties('AWS::Lambda::Function', {
     Handler: 'index.handler',
-    Runtime: Runtime.PYTHON_3_9,
+    Runtime: "python3.9",
   });
 });
