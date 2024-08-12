@@ -17,11 +17,8 @@ export class PersonalWebSiteStack extends cdk.Stack {
 
     // Create an S3 bucket for static website hosting
     const websiteBucket = new s3.Bucket(this, `pws-${ENVIRONMENT}`, {
-      websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
-      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
-      accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      publicReadAccess: false,
+      encryption: s3.BucketEncryption.S3_MANAGED
     });
 
     // // Deploy static files to the S3 bucket
