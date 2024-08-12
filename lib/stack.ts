@@ -31,10 +31,10 @@ export class PersonalWebSiteStack extends cdk.Stack {
       destinationBucket: websiteBucket,
     });
 
-    const originAccess = new OriginAccessIdentity(this, 'OriginAccessControl', {comment: 'Personal Website'});
+    const originAccess = new OriginAccessIdentity(this, `OriginAccessControl-${ENVIRONMENT}`, {comment: 'Personal Website'});
     const s3origin = new S3Origin(websiteBucket, {originAccessIdentity: originAccess})
 
-    new Distribution(scope, 'aws-to-do-app-cfn-distribution', {
+    new Distribution(this, `distribution-${ENVIRONMENT}`, {
       defaultBehavior: {
           origin: s3origin,
           viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
