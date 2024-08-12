@@ -26,7 +26,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
 
     // Deploy static files to the S3 bucket
     new s3deploy.BucketDeployment(this, `bucket-deploy-pws-${ENVIRONMENT}`, {
-      sources: [s3deploy.Source.asset('./static')],
+      sources: [s3deploy.Source.asset('./resources/static')],
       destinationBucket: websiteBucket,
     });
 
