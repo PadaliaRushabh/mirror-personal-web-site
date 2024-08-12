@@ -7,7 +7,8 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
 import { BlockPublicAccess, BucketAccessControl } from "aws-cdk-lib/aws-s3";
-
+import {AllowedMethods, Distribution, OriginAccessIdentity, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
+import {S3Origin} from "aws-cdk-lib/aws-cloudfront-origins";
 
 export class PersonalWebSiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -29,6 +30,25 @@ export class PersonalWebSiteStack extends cdk.Stack {
       sources: [s3deploy.Source.asset('./resources/static')],
       destinationBucket: websiteBucket,
     });
+
+    const originAccess = new OriginAccessIdentity(this, 'OriginAccessControl', {comment: 'Personal Website'});
+    const s3origin = new S3Origin(websiteBucket, {originAccessIdentity: originAccess})
+
+    new Distribution(scope, 'aws-to-do-app-cfn-distribution', {
+      defaultBehavior: {
+          origin: s3origin,
+          viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
+          allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
+      },
+      errorResponses: [
+          {
+              httpStatus: 403,
+              responsePagePath: '/index.html',
+              responseHttpStatus: 200
+          }
+      ],
+  })
+
 
     // // Create a CloudFront distribution
     // const certificate = new certmgr.Certificate(this, 'Certificate', {
