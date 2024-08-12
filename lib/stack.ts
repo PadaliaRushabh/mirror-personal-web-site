@@ -31,56 +31,54 @@ export class PersonalWebSiteStack extends cdk.Stack {
       destinationBucket: websiteBucket,
     });
 
-    const originAccess = new OriginAccessIdentity(this, `OriginAccessControl-${ENVIRONMENT}`, {comment: 'Personal Website'});
+    const originAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-${ENVIRONMENT}`, {comment: 'Personal Website'});
     const s3origin = new S3Origin(websiteBucket, {originAccessIdentity: originAccess})
 
-    new Distribution(this, `distribution-${ENVIRONMENT}`, {
+    // Create a new hosted zone for the domain
+    const hostedZone = new route53.HostedZone(this, `pws-HostedZone-${ENVIRONMENT}`, {
+      zoneName: 'rushabhpadalia.me',
+    });
+
+    // Generate new SSL certificate
+    const certificate = new certmgr.Certificate(this, `pws-Certificate-${ENVIRONMENT}`, {
+      domainName: 'rushabhpadalia.me',
+      subjectAlternativeNames: ['*.rushabhpadalia.me'], // Include subdomains
+      validation: certmgr.CertificateValidation.fromDns(),
+    });
+
+
+    const distribution = new Distribution(this, `pws-distribution-${ENVIRONMENT}`, {
       defaultBehavior: {
           origin: s3origin,
           viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
       },
+      domainNames: ['rushabhpadalia.me', 'test.rushabhpadalia.me'],
+      sslSupportMethod: cloudfront.SSLMethod.SNI,
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       errorResponses: [
           {
               httpStatus: 403,
               responsePagePath: '/index.html',
               responseHttpStatus: 200
           }
-      ],
+      ], 
+      certificate: certificate
   })
 
 
-    // // Create a CloudFront distribution
-    // const certificate = new certmgr.Certificate(this, 'Certificate', {
-    //   domainName: 'example.com',
-    //   validation: certmgr.CertificateValidation.fromDns(),
-    // });
+    // Create a Route 53 record set to point to CloudFront
+    new route53.ARecord(this, `pws-AliasRecord-${ENVIRONMENT}`, {
+      zone: hostedZone,
+      recordName: 'rushabhpadalia.me',
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    });
 
-    // const distribution = new cloudfront.CloudFrontWebDistribution(this, 'WebsiteDistribution', {
-    //   originConfigs: [{
-    //     s3OriginSource: {
-    //       s3BucketSource: websiteBucket,
-    //     },
-    //     behaviors: [{ isDefaultBehavior: true }],
-    //   }],
-    //   viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(certificate, {
-    //     aliases: ['example.com'],
-    //     securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2018,
-    //     sslSupportMethod: cloudfront.SSLMethod.SNI,
-    //   }),
-    // });
-
-    // // Create a Route 53 Hosted Zone
-    // const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-    //   domainName: 'example.com',
-    // });
-
-    // // Create a Route 53 record set to point to CloudFront
-    // new route53.ARecord(this, 'AliasRecord', {
-    //   zone: hostedZone,
-    //   recordName: 'example.com',
-    //   target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
-    // });
+    new route53.ARecord(this, `pws-SubdomainAliasRecord-${ENVIRONMENT}`, {
+      recordName: 'test.rushabhpadalia.me',
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      zone: hostedZone,
+    });
   }
 }
 
