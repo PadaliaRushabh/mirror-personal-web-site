@@ -24,11 +24,11 @@ export class PersonalWebSiteStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // // Deploy static files to the S3 bucket
-    // new s3deploy.BucketDeployment(this, `bucket-deploy-pws-${ENVIRONMENT}`, {
-    //   sources: [s3deploy.Source.asset('./website')],
-    //   destinationBucket: websiteBucket,
-    // });
+    // Deploy static files to the S3 bucket
+    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-${ENVIRONMENT}`, {
+      sources: [s3deploy.Source.asset('./static')],
+      destinationBucket: websiteBucket,
+    });
 
     // // Create a CloudFront distribution
     // const certificate = new certmgr.Certificate(this, 'Certificate', {
