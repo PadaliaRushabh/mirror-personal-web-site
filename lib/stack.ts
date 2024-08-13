@@ -74,7 +74,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
       zone: hostedZone,
     });
 
-    new route53.ARecord(this, `pws-SubdomainAliasRecord-${ENVIRONMENT}`, {
+    new route53.ARecord(this, `pws-wwwSubdomainAliasRecord-${ENVIRONMENT}`, {
       recordName: 'www.rushabhpadalia.me',
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
       zone: hostedZone,
