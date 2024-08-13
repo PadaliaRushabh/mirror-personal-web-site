@@ -14,6 +14,7 @@ const certificatestack = new CertificateStack(app, 'CertificateStack', {
 });
 
 new PersonalWebSiteStack(app, 'PersonalWebSiteStack', {
+    env: { region: 'ap-southeast-2' },
     environment:env, 
     certificate: certificatestack.certificate,
     crossRegionReferences: true // <-- Enable cross region references
