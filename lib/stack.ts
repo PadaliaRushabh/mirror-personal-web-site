@@ -47,7 +47,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
           viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
       },
-      domainNames: ['rushabhpadalia.me', 'test.rushabhpadalia.me'],
+      domainNames: ['rushabhpadalia.me', "www.rushabhpadalia.me", 'test.rushabhpadalia.me'],
       sslSupportMethod: cloudfront.SSLMethod.SNI,
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       errorResponses: [
