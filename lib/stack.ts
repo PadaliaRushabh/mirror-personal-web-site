@@ -47,7 +47,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
           viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
       },
-      domainNames: ['rushabhpadalia.me', "www.rushabhpadalia.me", 'test.rushabhpadalia.me'],
+      domainNames: ['rushabhpadalia.me', "www.rushabhpadalia.me", 'staging.rushabhpadalia.me'],
       sslSupportMethod: cloudfront.SSLMethod.SNI,
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       errorResponses: [
@@ -69,7 +69,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     });
 
     new route53.ARecord(this, `pws-SubdomainAliasRecord-${ENVIRONMENT}`, {
-      recordName: 'test.rushabhpadalia.me',
+      recordName: 'staging.rushabhpadalia.me',
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
       zone: hostedZone,
     });
