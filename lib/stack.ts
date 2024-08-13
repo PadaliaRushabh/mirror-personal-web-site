@@ -9,12 +9,13 @@ import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
 import { BlockPublicAccess, BucketAccessControl } from "aws-cdk-lib/aws-s3";
 import {AllowedMethods, Distribution, OriginAccessIdentity, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {S3Origin} from "aws-cdk-lib/aws-cloudfront-origins";
+import {CustomStackProps} from "../bin/stackprops"
 
 export class PersonalWebSiteStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: CustomStackProps) {
     super(scope, id, props);
 
-    const ENVIRONMENT = props?.env || "dev"
+    const ENVIRONMENT = props?.environment || "dev"
 
     // Create an S3 bucket for static website hosting
     const websiteBucket = new s3.Bucket(this, `pws-${ENVIRONMENT}`, {
