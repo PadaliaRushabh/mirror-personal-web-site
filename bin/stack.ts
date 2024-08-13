@@ -9,7 +9,8 @@ const env = app.node.tryGetContext('environment')
 
 const certificatestack = new CertificateStack(app, 'CertificateStack', {  
     env: { region: 'us-east-1' },
-    environment: env
+    environment: env,
+    crossRegionReferences: true // <-- Enable cross region references
 });
 
 new PersonalWebSiteStack(app, 'PersonalWebSiteStack', {
