@@ -16,6 +16,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     super(scope, id, props);
 
     const ENVIRONMENT = props?.environment || "dev"
+    const CERTIFICATE = props?.certificate
 
     // Create an S3 bucket for static website hosting
     const websiteBucket = new s3.Bucket(this, `pws-${ENVIRONMENT}`, {
@@ -40,14 +41,6 @@ export class PersonalWebSiteStack extends cdk.Stack {
       zoneName: 'rushabhpadalia.me',
     });
 
-    // Generate new SSL certificate
-    const certificate = new certmgr.Certificate(this, `pws-Certificate-${ENVIRONMENT}`, {
-      domainName: 'rushabhpadalia.me',
-      subjectAlternativeNames: ['*.rushabhpadalia.me'], // Include subdomains
-      validation: certmgr.CertificateValidation.fromDns(),
-    });
-
-
     const distribution = new Distribution(this, `pws-distribution-${ENVIRONMENT}`, {
       defaultBehavior: {
           origin: s3origin,
@@ -64,7 +57,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
               responseHttpStatus: 200
           }
       ], 
-      certificate: certificate
+      certificate: CERTIFICATE
   })
 
 
