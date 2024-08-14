@@ -5,17 +5,13 @@ import {CertificateStack} from '../lib/certificatestack';
 
 const app = new cdk.App();
 
-const env = app.node.tryGetContext('environment')
-
 const certificatestack = new CertificateStack(app, 'CertificateStack', {  
     env: { region: 'us-east-1' },
-    environment: env,
     crossRegionReferences: true // <-- Enable cross region references
 });
 
 new PersonalWebSiteStack(app, 'PersonalWebSiteStack', {
     env: { region: 'ap-southeast-2' },
-    environment:env, 
     certificate: certificatestack.certificate,
     crossRegionReferences: true // <-- Enable cross region references
 
