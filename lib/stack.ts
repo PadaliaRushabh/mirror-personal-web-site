@@ -33,18 +33,6 @@ export class PersonalWebSiteStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-
-    // Deploy static files to the S3 bucket
-    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-prd`, {
-      sources: [s3deploy.Source.asset('./resources/static/prd')],
-      destinationBucket: prdwebsiteBucket,
-    });
-
-    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-staging`, {
-      sources: [s3deploy.Source.asset('./resources/static/staging')],
-      destinationBucket: stagingwebsiteBucket,
-    });
-
     const prdoriginAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-prd`, {comment: 'PRD Personal Website'});
     const prds3origin = new S3Origin(prdwebsiteBucket, {originAccessIdentity: prdoriginAccess})
     
@@ -73,27 +61,42 @@ export class PersonalWebSiteStack extends cdk.Stack {
           }
       ], 
       certificate: CERTIFICATE
-  })
+    })
 
-  const stagingdistribution = new Distribution(this, `pws-distribution-staging`, {
-    defaultBehavior: {
-        origin: stagings3origin,
-        viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
-        allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
-    },
-    domainNames: [ "staging.rushabhpadalia.me"],
-    sslSupportMethod: cloudfront.SSLMethod.SNI,
-    minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
-    errorResponses: [
-        {
-            httpStatus: 403,
-            responsePagePath: '/index.html',
-            responseHttpStatus: 200
-        }
-    ], 
-    certificate: CERTIFICATE
-  })
+    const stagingdistribution = new Distribution(this, `pws-distribution-staging`, {
+      defaultBehavior: {
+          origin: stagings3origin,
+          viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
+          allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
+      },
+      domainNames: [ "staging.rushabhpadalia.me"],
+      sslSupportMethod: cloudfront.SSLMethod.SNI,
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+      errorResponses: [
+          {
+              httpStatus: 403,
+              responsePagePath: '/index.html',
+              responseHttpStatus: 200
+          }
+      ], 
+      certificate: CERTIFICATE
+    })
 
+    // Deploy static files to the S3 bucket
+    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-prd`, {
+      sources: [s3deploy.Source.asset('./resources/static/prd')],
+      destinationBucket: prdwebsiteBucket,
+      distribution: prddistribution, // CloudFront distribution to invalidate
+      distributionPaths: ['/*'], // Invalidate all paths, or specify the paths you need
+    });
+
+    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-staging`, {
+      sources: [s3deploy.Source.asset('./resources/static/staging')],
+      destinationBucket: stagingwebsiteBucket,
+      distribution: stagingdistribution, // CloudFront distribution to invalidate
+      distributionPaths: ['/*'], // Invalidate all paths, or specify the paths you need
+    });
+    
     // Create a Route 53 record set to point to CloudFront
     new route53.ARecord(this, `pws-AliasRecord-root`, {
       zone: hostedZone,
