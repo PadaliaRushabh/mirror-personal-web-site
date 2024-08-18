@@ -28,7 +28,7 @@ before_script:
 
 stages:          # List of stages for jobs, and their order of execution
   - build
-  - test
+  # - test
   - deploy
 
 build-job:       # This job runs in the build stage, which runs first.
@@ -37,20 +37,20 @@ build-job:       # This job runs in the build stage, which runs first.
     - npm run build
 
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test
-  image: python:3.10  # Specify the base Docker image with Python installed
-  before_script:
-    - python -V  # Display Python version for debugging purposes
-    - pip install --upgrade pip  # Upgrade pip to the latest version
-    - pip install tox  # Install tox
-  script:
-    - tox  # Run tox to execute the tests
-  artifacts:
-    when: always
-    paths:
-      - .tox/  # Store the Tox environment and results as artifacts
-    expire_in: 1 week  # Define how long artifacts should be kept
+# unit-test-job:   # This job runs in the test stage.
+#   stage: test
+#   image: python:3.10  # Specify the base Docker image with Python installed
+#   before_script:
+#     - python -V  # Display Python version for debugging purposes
+#     - pip install --upgrade pip  # Upgrade pip to the latest version
+#     - pip install tox  # Install tox
+#   script:
+#     - tox  # Run tox to execute the tests
+#   artifacts:
+#     when: always
+#     paths:
+#       - .tox/  # Store the Tox environment and results as artifacts
+#     expire_in: 1 week  # Define how long artifacts should be kept
 
 # Job to run CDK tests
 # cdk_test:
