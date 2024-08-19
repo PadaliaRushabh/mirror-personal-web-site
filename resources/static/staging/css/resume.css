@@ -152,4 +152,37 @@ a {
   background-image: url('../img/pandas.svg');
 }
 
+.icon-spark-plain {
+  background-image: url('../img/apache_spark.svg');
+}
+
+.icon-cloudformation-plain {
+  background-image: url('../img/aws_cloudformation.svg');
+}
+
+.icon-stepfunction-plain {
+  background-image: url('../img/aws_step_functions.svg');
+}
+
+.icon-docker-plain {
+  background-image: url('../img/docker.svg');
+}
+
+.icon-gitlab-plain {
+  background-image: url('../img/gitlab.svg');
+}
+
+.icon-postgresql-plain {
+  background-image: url('../img/postgresql.svg');
+}
+
+.icon-python-plain {
+  background-image: url('../img/python.svg');
+}
+
+.icon-typescript-plain {
+  background-image: url('../img/typescript.svg');
+}
+
+
 
