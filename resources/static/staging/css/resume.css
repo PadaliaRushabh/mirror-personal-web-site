@@ -113,3 +113,34 @@ a {
   color: #BD5D38; }
   a:hover, a:focus, a:active {
     color: #824027; }
+
+
+/* Add more custom icons here */
+
+.list-inline {
+    padding-left: 0;
+    list-style-type: none;
+    margin: 0;
+    display: flex;
+    gap: 10px; /* Space between icons */
+}
+
+.list-inline-item {
+    display: inline-block;
+}
+
+.list-inline-item i {
+    width: 48px;
+    height: 72px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.icon-aws-plain {
+    background-image: url('../img/8546827_aws_icon.svg');
+}
+
