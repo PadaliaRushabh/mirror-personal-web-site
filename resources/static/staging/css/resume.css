@@ -144,3 +144,8 @@ a {
     background-image: url('../img/8546827_aws_icon.svg');
 }
 
+.icon-dynamodb-plain {
+  background-image: url('../img/aws-dynamodb.svg');
+}
+
+
