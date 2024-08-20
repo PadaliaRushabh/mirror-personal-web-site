@@ -140,6 +140,10 @@ a {
     background-position: center;
 }
 
+mt-auto, .my-auto {
+  margin-top: 0 !important;
+}
+
 .icon-aws-plain {
     background-image: url('../img/aws.svg');
 }
