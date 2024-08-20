@@ -85,12 +85,12 @@ h2 {
           #sideNav .navbar-collapse .navbar-nav .nav-item .nav-link {
             display: block; } }
 
-section.resume-section {
-  border-bottom: 1px solid #dee2e6;
-  padding-top: 5rem !important;
-  padding-bottom: 5rem !important; }
-  section.resume-section .resume-item .resume-date {
-    min-width: none; }
+
+@media (min-width: 768px) {
+  section.resume-section-first {
+    min-height: 55vh; }
+    section.resume-section-first .resume-item .resume-date {
+      min-width: 18rem; } }
 
 @media (min-width: 768px) {
   section.resume-section {
@@ -98,8 +98,15 @@ section.resume-section {
     section.resume-section .resume-item .resume-date {
       min-width: 18rem; } }
 
+section.resume-section.resume-section-first {
+  border-bottom: 1px solid #dee2e6;
+  padding-top: 5rem !important;
+  padding-bottom: 5rem !important; }
+  section.resume-section .resume-item .resume-date {
+    min-width: none; }
+
 @media (min-width: 992px) {
-  section.resume-section {
+  section.resume-section.resume-section-first {
     padding-top: 3rem !important;
     padding-bottom: 3rem !important; } }
 
