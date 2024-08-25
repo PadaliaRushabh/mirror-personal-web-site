@@ -1,93 +1,122 @@
 # personal-web-site
 
 
+# Personal Website Infrastructure
 
-## Getting started
+## Overview
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This repository contains the AWS CDK code that provisions and deploys the infrastructure for my personal website. The infrastructure includes S3 buckets for hosting static files, CloudFront distributions for content delivery, and Route 53 for DNS management. The project also includes a GitLab CI/CD pipeline for automated deployment.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Infrastructure Components
 
-## Add your files
+### S3 Buckets
+Two S3 buckets are created to host the static files for the website:
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- **Production Bucket (`pws-prd`)**: Used to host the production version of the website.
+- **Staging Bucket (`pws-staging`)**: Used to host the staging version of the website.
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/PadaliaRushabh/personal-web-site.git
-git branch -M main
-git push -uf origin main
-```
+Both buckets are configured with the following properties:
+- **Public Read Access**: Disabled
+- **Encryption**: S3-managed encryption
+- **Block Public Access**: Enabled
+- **Access Control**: Full control to the bucket owner
+- **Removal Policy**: Destroy (the bucket will be deleted when the stack is destroyed)
 
-## Integrate with your tools
+### CloudFront Distributions
+Two CloudFront distributions are created to serve the content from the S3 buckets:
 
-- [ ] [Set up project integrations](https://gitlab.com/PadaliaRushabh/personal-web-site/-/settings/integrations)
+- **Production Distribution (`pws-distribution-prd`)**
+- **Staging Distribution (`pws-distribution-staging`)**
 
-## Collaborate with your team
+Both distributions are configured with the following properties:
+- **Viewer Protocol Policy**: Allow all protocols (HTTP and HTTPS)
+- **Allowed Methods**: GET, HEAD, OPTIONS
+- **SSL Support Method**: SNI
+- **Minimum Protocol Version**: TLS v1.2 2021
+- **Custom Error Responses**: 
+  - 403 errors are redirected to `/index.html` with a 200 status code.
+- **Certificates**: Uses an SSL certificate provided via the `CustomStackProps`.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Route 53 Hosted Zone
+A Route 53 hosted zone is created for managing the DNS records for the domain `rushabhpadalia.me`.
 
-## Test and Deploy
+### DNS Records
+The following DNS records are created in Route 53:
 
-Use the built-in continuous integration in GitLab.
+- **A Record for `rushabhpadalia.me`**: Points to the production CloudFront distribution.
+- **A Record for `www.rushabhpadalia.me`**: Points to the production CloudFront distribution.
+- **A Record for `staging.rushabhpadalia.me`**: Points to the staging CloudFront distribution.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### S3 Bucket Deployment
+Static files are deployed to the respective S3 buckets using the `BucketDeployment` construct. After deployment, the CloudFront distributions are invalidated to ensure the latest content is served.
 
-***
+- **Production Deployment (`bucket-deploy-pws-prd`)**
+  - Source: `./resources/static/prd`
+  - Destination: Production S3 Bucket
+  - Invalidation: Invalidates all paths (`/*`) on the production CloudFront distribution
 
-# Editing this README
+- **Staging Deployment (`bucket-deploy-pws-staging`)**
+  - Source: `./resources/static/staging`
+  - Destination: Staging S3 Bucket
+  - Invalidation: Invalidates all paths (`/*`) on the staging CloudFront distribution
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Prerequisites
 
-## Suggestions for a good README
+Before deploying this stack, ensure you have the following:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- **AWS Account**: With permissions to manage S3, CloudFront, and Route 53.
+- **AWS CLI**: Configured with your credentials.
+- **Node.js**: For running AWS CDK commands.
+- **AWS CDK**: Installed globally.
 
-## Name
-Choose a self-explaining name for your project.
+## Update Namecheap DNS
+In your Namecheap account, update the nameservers to point to the AWS Route 53 nameservers. This will connect your domain to the Route 53 hosted zone.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## File Structure
+├── bin/
+│   └── stackprops.ts         # CustomStackProps definition
+├── lib/
+│   └── personal-website-stack.ts # Main stack definition
+├── resources/
+│   └── static/
+│       ├── prd/              # Static files for production
+│       └── staging/          # Static files for staging
+├── cdk.json                  # CDK configuration file
+├── package.json              # Node.js dependencies and scripts
+├── README.md                 # Project documentation
+└── tsconfig.json             # TypeScript configuration
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# AWS Architecture for Personal Website
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Overview
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+This architecture leverages AWS services to host, secure, and deliver a personal static website with high availability, scalability, and security. The key components include S3 for static file storage, CloudFront for content delivery, Route 53 for DNS management, and GitLab CI/CD for automated deployments.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Architecture Components
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 1. S3 Buckets for Static Website Hosting
+- **Purpose**: S3 is used to store and serve the static files (HTML, CSS, images, etc.) of the website.
+- **Setup**:
+  - **Production Bucket** (`pws-prd`): Hosts the production version of the website.
+  - **Staging Bucket** (`pws-staging`): Hosts the staging version of the website.
+  - **Security**:
+    - Public access is blocked.
+    - Data is encrypted using S3-managed encryption keys.
+    - Access is controlled with `BUCKET_OWNER_FULL_CONTROL`.
+    - Buckets are set to be destroyed when the stack is deleted (`RemovalPolicy.DESTROY`).
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 2. CloudFront Distributions
+- **Purpose**: CloudFront acts as a Content Delivery Network (CDN) that ensures fast, secure delivery of the website by caching content at global edge locations.
+- **Setup**:
+  - **Production Distribution** (`pws-distribution-prd`): Serves content from the production S3 bucket.
+  - **Staging Distribution** (`pws-distribution-staging`): Serves content from the staging S3 bucket.
+  - **Security**:
+    - SSL/TLS certificates are used to secure the communication between users and CloudFront.
+    - The latest TLS version (TLS v1.2) is enforced.
+    - Custom error responses redirect 403 errors to `index.html`.
+  - **Origins**: CloudFront fetches content from the S3 buckets using Origin Access Identity (OAI), ensuring that the S3 buckets are not publicly accessible.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### 3. Origin Access Identity (OAI)
+- **Purpose**: Restricts direct access to the S3 buckets by allowing only CloudFront to fetch content from th
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
