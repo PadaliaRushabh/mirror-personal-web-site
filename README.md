@@ -60,48 +60,7 @@ Static files are deployed to the respective S3 buckets using the `BucketDeployme
   - Destination: Staging S3 Bucket
   - Invalidation: Invalidates all paths (`/*`) on the staging CloudFront distribution
 
-## Prerequisites
-
-Before deploying this stack, ensure you have the following:
-
-- **AWS Account**: With permissions to manage S3, CloudFront, and Route 53.
-- **AWS CLI**: Configured with your credentials.
-- **Node.js**: For running AWS CDK commands.
-- **AWS CDK**: Installed globally.
 
 ## Update Namecheap DNS
-In your Namecheap account, update the nameservers to point to the AWS Route 53 nameservers. This will connect your domain to the Route 53 hosted zone.
-
-# AWS Architecture for Personal Website
-
-## Overview
-
-This architecture leverages AWS services to host, secure, and deliver a personal static website with high availability, scalability, and security. The key components include S3 for static file storage, CloudFront for content delivery, Route 53 for DNS management, and GitLab CI/CD for automated deployments.
-
-## Architecture Components
-
-### 1. S3 Buckets for Static Website Hosting
-- **Purpose**: S3 is used to store and serve the static files (HTML, CSS, images, etc.) of the website.
-- **Setup**:
-  - **Production Bucket** (`pws-prd`): Hosts the production version of the website.
-  - **Staging Bucket** (`pws-staging`): Hosts the staging version of the website.
-  - **Security**:
-    - Public access is blocked.
-    - Data is encrypted using S3-managed encryption keys.
-    - Access is controlled with `BUCKET_OWNER_FULL_CONTROL`.
-    - Buckets are set to be destroyed when the stack is deleted (`RemovalPolicy.DESTROY`).
-
-### 2. CloudFront Distributions
-- **Purpose**: CloudFront acts as a Content Delivery Network (CDN) that ensures fast, secure delivery of the website by caching content at global edge locations.
-- **Setup**:
-  - **Production Distribution** (`pws-distribution-prd`): Serves content from the production S3 bucket.
-  - **Staging Distribution** (`pws-distribution-staging`): Serves content from the staging S3 bucket.
-  - **Security**:
-    - SSL/TLS certificates are used to secure the communication between users and CloudFront.
-    - The latest TLS version (TLS v1.2) is enforced.
-    - Custom error responses redirect 403 errors to `index.html`.
-  - **Origins**: CloudFront fetches content from the S3 buckets using Origin Access Identity (OAI), ensuring that the S3 buckets are not publicly accessible.
-
-### 3. Origin Access Identity (OAI)
-- **Purpose**: Restricts direct access to the S3 buckets by allowing only CloudFront to fetch content from th
+The domain is purchased via namecheap. In the Namecheap account, update the nameservers to point to the AWS Route 53 nameservers. This will connect domain to the Route 53 hosted zone.
 
