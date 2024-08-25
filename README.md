@@ -72,21 +72,6 @@ Before deploying this stack, ensure you have the following:
 ## Update Namecheap DNS
 In your Namecheap account, update the nameservers to point to the AWS Route 53 nameservers. This will connect your domain to the Route 53 hosted zone.
 
-## File Structure
-├── bin/
-│   └── stackprops.ts         # CustomStackProps definition
-├── lib/
-│   └── personal-website-stack.ts # Main stack definition
-├── resources/
-│   └── static/
-│       ├── prd/              # Static files for production
-│       └── staging/          # Static files for staging
-├── cdk.json                  # CDK configuration file
-├── package.json              # Node.js dependencies and scripts
-├── README.md                 # Project documentation
-└── tsconfig.json             # TypeScript configuration
-
-
 # AWS Architecture for Personal Website
 
 ## Overview
