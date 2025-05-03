@@ -26,10 +26,11 @@ variables:
 before_script:
   - npm install
 
-stages:          # List of stages for jobs, and their order of execution
+stages:
   - build
-  # - test
-  - deploy
+  - deploy_dev
+  - deploy_tst
+  - deploy_prd
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
@@ -67,21 +68,74 @@ build-job:       # This job runs in the build stage, which runs first.
   #     - coverage/  # If you generate coverage reports
   #   expire_in: 1 week
 
-deploy-job: # This job runs in the deploy stage.
-  stage: deploy
+deploy-dev:
+  stage: deploy_dev
   script:
+    - echo "Deploying to DEV"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-    - npx cdk deploy --all --require-approval never --context ENVIRONMENT=$ENVIRONMENT
+    - |
+      npx cdk deploy \
+      --all --require-approval never \
+      --context ENVIRONMENT=$ENVIRONMENT \
+      --context BUCKET_NAME=$BUCKET_NAME \
+      --context DOMAIN_NAME=$DOMAIN_NAME
+  variables:
+    ENVIRONMENT: "dev"
+    BUCKET_NAME: "pws-dev"
+    DOMAIN_NAME: '["dev.rushabhpadalia.me"]'
   environment:
-    name: $CI_ENVIRONMENT_NAME
+    name: dev
   rules:
-  - if: '$CI_COMMIT_BRANCH == "main"'
-    variables:
-      ENVIRONMENT: "prd"
-      CI_ENVIRONMENT_NAME: "prd"
-  - if: '$CI_COMMIT_BRANCH != "main"'
-    variables:
-      ENVIRONMENT: "dev"
-      CI_ENVIRONMENT_NAME: "dev"
+    - if: '$CI_COMMIT_BRANCH =~ /^dev\//'
+
+deploy-tst:
+  stage: deploy_tst
+  script:
+    - echo "Deploying to TST"
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+    - npx cdk deploy --all --require-approval never --context ENVIRONMENT=tst
+    - |
+      npx cdk deploy \
+      --all --require-approval never \
+      --context ENVIRONMENT=$ENVIRONMENT \
+      --context BUCKET_NAME=$BUCKET_NAME \
+      --context DOMAIN_NAME=$DOMAIN_NAME
+  variables:
+    ENVIRONMENT: "tst"
+    BUCKET_NAME: "pws-stagging"
+    DOMAIN_NAME: '["staging.rushabhpadalia.me"]'
+  environment:
+    name: tst
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+deploy-prd:
+  stage: deploy_prd
+  script:
+    - echo "Deploying to PRD"
+    - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+    - npx cdk deploy --all --require-approval never --context ENVIRONMENT=prd
+    - |
+      npx cdk deploy \
+      --all --require-approval never \
+      --context ENVIRONMENT=$ENVIRONMENT \
+      --context BUCKET_NAME=$BUCKET_NAME \
+      --context DOMAIN_NAME=$DOMAIN_NAME
+  variables:
+    ENVIRONMENT: "prd"
+    BUCKET_NAME: "pws-prd"
+    DOMAIN_NAME: '["rushabhpadalia.me", "www.rushabhpadalia.me"]'
+  environment:
+    name: prd
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+      allow_failure: false
+  needs:
+    - deploy-tst

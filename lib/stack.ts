@@ -15,9 +15,14 @@ export class PersonalWebSiteStack extends cdk.Stack {
     super(scope, id, props);
 
     const CERTIFICATE = props?.certificate
+    const environment = props!.environment
+    const bucketName = props!.bucketName
+    const domainName = props!.domainName
+    const isProd = environment === 'prd';
+
 
     // Create an S3 bucket for static website hosting
-    const prdwebsiteBucket = new s3.Bucket(this, `pws-prd`, {
+    const websiteBucket = new s3.Bucket(this, bucketName, {
       publicReadAccess: false,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
@@ -25,32 +30,39 @@ export class PersonalWebSiteStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const stagingwebsiteBucket = new s3.Bucket(this, `pws-staging`, {
-      publicReadAccess: false,
-      encryption: s3.BucketEncryption.S3_MANAGED,
-      blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
-      accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+    // const stagingwebsiteBucket = new s3.Bucket(this, `pws-staging`, {
+    //   publicReadAccess: false,
+    //   encryption: s3.BucketEncryption.S3_MANAGED,
+    //   blockPublicAccess: BlockPublicAccess.BLOCK_ACLS,
+    //   accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    // });
 
-    const prdoriginAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-prd`, {comment: 'PRD Personal Website'});
-    const prds3origin = new S3Origin(prdwebsiteBucket, {originAccessIdentity: prdoriginAccess})
+    const originAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-${environment}`, {comment: 'PRD Personal Website'});
+    const s3origin = new S3Origin(websiteBucket, {originAccessIdentity: originAccess})
     
-    const stagingoriginAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-staging}`, {comment: 'Staging Personal Website'});
-    const stagings3origin = new S3Origin(stagingwebsiteBucket, {originAccessIdentity: stagingoriginAccess})
+    // const stagingoriginAccess = new OriginAccessIdentity(this, `pws-OriginAccessControl-staging}`, {comment: 'Staging Personal Website'});
+    // const stagings3origin = new S3Origin(stagingwebsiteBucket, {originAccessIdentity: stagingoriginAccess})
 
     // Create a new hosted zone for the domain
-    const hostedZone = new route53.HostedZone(this, `pws-HostedZone`, {
-      zoneName: 'rushabhpadalia.me',
-    });
+    // const hostedZone = new route53.HostedZone(this, `pws-HostedZone`, {
+    //   zoneName: 'rushabhpadalia.me',
+    // });
+    const hostedZone = isProd
+    ? new route53.HostedZone(this, 'MainZone', {
+        zoneName: 'rushabhpadalia.me',
+      })
+    : route53.HostedZone.fromLookup(this, 'ImportedZone', {
+        domainName: 'rushabhpadalia.me',
+      });
 
-    const prddistribution = new Distribution(this, `pws-distribution-prd`, {
+    const distribution = new Distribution(this, `pws-distribution-${environment}`, {
       defaultBehavior: {
-          origin: prds3origin,
+          origin: s3origin,
           viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
           allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
       },
-      domainNames: ['rushabhpadalia.me', "www.rushabhpadalia.me"],
+      domainNames: domainName,
       sslSupportMethod: cloudfront.SSLMethod.SNI,
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       errorResponses: [
@@ -63,58 +75,69 @@ export class PersonalWebSiteStack extends cdk.Stack {
       certificate: CERTIFICATE
     })
 
-    const stagingdistribution = new Distribution(this, `pws-distribution-staging`, {
-      defaultBehavior: {
-          origin: stagings3origin,
-          viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
-          allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
-      },
-      domainNames: [ "staging.rushabhpadalia.me"],
-      sslSupportMethod: cloudfront.SSLMethod.SNI,
-      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
-      errorResponses: [
-          {
-              httpStatus: 403,
-              responsePagePath: '/index.html',
-              responseHttpStatus: 200
-          }
-      ], 
-      certificate: CERTIFICATE
-    })
+    // const stagingdistribution = new Distribution(this, `pws-distribution-staging`, {
+    //   defaultBehavior: {
+    //       origin: stagings3origin,
+    //       viewerProtocolPolicy: ViewerProtocolPolicy.ALLOW_ALL,
+    //       allowedMethods: AllowedMethods.ALLOW_GET_HEAD_OPTIONS
+    //   },
+    //   domainNames: [ "staging.rushabhpadalia.me"],
+    //   sslSupportMethod: cloudfront.SSLMethod.SNI,
+    //   minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+    //   errorResponses: [
+    //       {
+    //           httpStatus: 403,
+    //           responsePagePath: '/index.html',
+    //           responseHttpStatus: 200
+    //       }
+    //   ], 
+    //   certificate: CERTIFICATE
+    // })
 
     // Deploy static files to the S3 bucket
-    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-prd`, {
-      sources: [s3deploy.Source.asset('./resources/static/prd')],
-      destinationBucket: prdwebsiteBucket,
-      distribution: prddistribution, // CloudFront distribution to invalidate
+    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-${environment}`, {
+      sources: [s3deploy.Source.asset('./resources/static/web')],
+      destinationBucket: websiteBucket,
+      distribution: distribution, // CloudFront distribution to invalidate
       distributionPaths: ['/*'], // Invalidate all paths, or specify the paths you need
     });
 
-    new s3deploy.BucketDeployment(this, `bucket-deploy-pws-staging`, {
-      sources: [s3deploy.Source.asset('./resources/static/staging')],
-      destinationBucket: stagingwebsiteBucket,
-      distribution: stagingdistribution, // CloudFront distribution to invalidate
-      distributionPaths: ['/*'], // Invalidate all paths, or specify the paths you need
-    });
+    // new s3deploy.BucketDeployment(this, `bucket-deploy-pws-staging`, {
+    //   sources: [s3deploy.Source.asset('./resources/static/staging')],
+    //   destinationBucket: stagingwebsiteBucket,
+    //   distribution: stagingdistribution, // CloudFront distribution to invalidate
+    //   distributionPaths: ['/*'], // Invalidate all paths, or specify the paths you need
+    // });
     
     // Create a Route 53 record set to point to CloudFront
-    new route53.ARecord(this, `pws-AliasRecord-root`, {
-      zone: hostedZone,
-      recordName: 'rushabhpadalia.me',
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(prddistribution)),
+    domainName.forEach((domain) => {
+      const safeId = `pws-AliasRecord_${domain.replace(/[\.\-]/g, '_')}`;
+
+      new route53.ARecord(this, safeId, {
+        zone: hostedZone,
+        recordName: domain, // e.g., 'dev.rushabhpadalia.me'
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      });
     });
 
-    new route53.ARecord(this, `pws-wwwSubdomainAliasRecord-www`, {
-      recordName: 'www.rushabhpadalia.me',
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(prddistribution)),
-      zone: hostedZone,
-    }); 
     
-    new route53.ARecord(this, `pws-SubdomainAliasRecord-staging`, {
-      recordName: 'staging.rushabhpadalia.me',
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(stagingdistribution)),
-      zone: hostedZone,
-    });
+    // new route53.ARecord(this, `pws-AliasRecord-root`, {
+    //   zone: hostedZone,
+    //   recordName: 'rushabhpadalia.me',
+    //   target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    // });
+
+    // new route53.ARecord(this, `pws-wwwSubdomainAliasRecord-www`, {
+    //   recordName: 'www.rushabhpadalia.me',
+    //   target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(prddistribution)),
+    //   zone: hostedZone,
+    // }); 
+    
+    // new route53.ARecord(this, `pws-SubdomainAliasRecord-staging`, {
+    //   recordName: 'staging.rushabhpadalia.me',
+    //   target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(stagingdistribution)),
+    //   zone: hostedZone,
+    // });
   }
 }
 
