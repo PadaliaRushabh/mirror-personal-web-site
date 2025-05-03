@@ -18,13 +18,13 @@ console.log("Environment Variables From CI/CD: ", {
     bucketName: bucketName
 });
 
-const certificatestack = new CertificateStack(app, 'CertificateStack', {  
+const certificatestack = new CertificateStack(app, `CertificateStack-${environment}`, {  
     env: { region: 'us-east-1' },
     environment: environment,
     crossRegionReferences: true // <-- Enable cross region references
 });
 
-new PersonalWebSiteStack(app, 'PersonalWebSiteStack', {
+new PersonalWebSiteStack(app, `PersonalWebSiteStack-${environment}`, {
     env: { region: 'ap-southeast-2' },
     certificate: certificatestack.certificate,
     environment: environment,
