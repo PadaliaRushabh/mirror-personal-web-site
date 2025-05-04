@@ -14,12 +14,10 @@ export class PersonalWebSiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CustomStackProps) {
     super(scope, id, props);
 
-    const CERTIFICATE = props?.certificate
     const environment = props!.environment
     const bucketName = props!.bucketName
     const domainName = props!.domainName
     const isProd = environment === 'prd';
-
 
     // Create an S3 bucket for static website hosting
     const websiteBucket = new s3.Bucket(this, bucketName, {

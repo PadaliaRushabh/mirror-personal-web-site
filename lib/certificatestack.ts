@@ -12,23 +12,24 @@ export class CertificateStack extends cdk.Stack {
     super(scope, id, props);
     
     const environment = props?.environment
-    if (environment === 'prd') {
-      // Generate new SSL certificate
-      this.certificate = new certmgr.Certificate(this, `pws-Certificate`, {
-        domainName: 'rushabhpadalia.me',
-        subjectAlternativeNames: ['*.rushabhpadalia.me'], // Include subdomains
-        validation: certmgr.CertificateValidation.fromDns(),
-      });
+    
+    // Generate new SSL certificate
+    this.certificate = new certmgr.Certificate(this, `pws-Certificate`, {
+      domainName: 'rushabhpadalia.me',
+      subjectAlternativeNames: ['*.rushabhpadalia.me'], // Include subdomains
+      validation: certmgr.CertificateValidation.fromDns(),
+    });
 
-      new ssm.StringParameter(this, 'CertificateArnParameter', {
-        parameterName: '/shared/certificate/arn',
-        stringValue: this.certificate.certificateArn,
-      });
-    } else{
-      // Import existing SSL certificate
-      const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
-      this.certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);
-    }
+    new ssm.StringParameter(this, 'CertificateArnParameter', {
+      parameterName: '/shared/certificate/arn',
+      stringValue: this.certificate.certificateArn,
+    });
+    
+   
+      // // Import existing SSL certificate
+      // const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
+      // this.certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);
+    
 
   }
 }

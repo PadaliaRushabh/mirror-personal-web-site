@@ -28,14 +28,30 @@ before_script:
 
 stages:
   - build
+  - deploy_certificate
   - deploy_dev
   - deploy_tst
   - deploy_prd
+
 
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
     - npm run build
+
+# Deploy CertificateStack only when pushing to main
+deploy-certificate:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+  script:
+    - echo "Deploying CertificateStack"
+    - npx cdk deploy CertificateStack \
+        --context ENVIRONMENT=prd \
+        --context DEPLOY_TARGET=certificate \
+        --require-approval never
+
 
 
 # unit-test-job:   # This job runs in the test stage.
@@ -76,11 +92,12 @@ deploy-dev:
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - |
-      npx cdk deploy \
-      --all --require-approval never \
+      npx cdk deploy PersonalWebSiteStack-$ENVIRONMENT \
+      --require-approval never \
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
-      --context DOMAIN_NAME=$DOMAIN_NAME
+      --context DOMAIN_NAME=$DOMAIN_NAME \
+      --context DEPLOY_TARGET=website 
   variables:
     ENVIRONMENT: "dev"
     BUCKET_NAME: "pws-dev"
@@ -98,11 +115,12 @@ deploy-tst:
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - |
-      npx cdk deploy \
-      --all --require-approval never \
+      npx cdk deploy PersonalWebSiteStack-$ENVIRONMENT \
+      --require-approval never \
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
-      --context DOMAIN_NAME=$DOMAIN_NAME
+      --context DOMAIN_NAME=$DOMAIN_NAME \
+      --context DEPLOY_TARGET=website
   variables:
     ENVIRONMENT: "tst"
     BUCKET_NAME: "pws-staging"
@@ -120,11 +138,12 @@ deploy-prd:
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
     - |
-      npx cdk deploy \
-      --all --require-approval never \
+      npx cdk deploy PersonalWebSiteStack-$ENVIRONMENT \
+      --require-approval never \
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
-      --context DOMAIN_NAME=$DOMAIN_NAME
+      --context DOMAIN_NAME=$DOMAIN_NAME \
+      --context DEPLOY_TARGET=website
   variables:
     ENVIRONMENT: "prd"
     BUCKET_NAME: "pws-prd"
