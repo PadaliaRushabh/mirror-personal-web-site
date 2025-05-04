@@ -48,8 +48,11 @@ if (deployTarget === 'all' || deployTarget === 'certificate') {
     throw new Error('Not Supported Deploy Target');
 }
 
-if ((deployTarget === 'all' || deployTarget === "website") && certificate) {
+const isDeployWebsite = ((deployTarget === 'all' || deployTarget === "website") && certificate);
+console.log("Deploying Website: ", isDeployWebsite);
 
+if (isDeployWebsite) {
+    console.log("Deploying Website");
     new PersonalWebSiteStack(app, `PersonalWebSiteStack-${environment}`, {
         env: { 
             account: account,
