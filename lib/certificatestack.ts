@@ -11,8 +11,6 @@ export class CertificateStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CertificateStackProps) {
     super(scope, id, props);
     
-    const environment = props?.environment
-    
     // Generate new SSL certificate
     this.certificate = new certmgr.Certificate(this, `pws-Certificate`, {
       domainName: 'rushabhpadalia.me',
@@ -24,11 +22,6 @@ export class CertificateStack extends cdk.Stack {
       parameterName: '/shared/certificate/arn',
       stringValue: this.certificate.certificateArn,
     });
-
-      // // Import existing SSL certificate
-      // const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
-      // this.certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);
-    
 
   }
 }

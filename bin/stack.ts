@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PersonalWebSiteStack } from '../lib/stack';
 import {CertificateStack} from '../lib/certificatestack';
-
+import {ZoneStack} from '../lib/zonestack'; 
 
 const app = new cdk.App();
 
@@ -14,7 +14,7 @@ const certificateArn = app.node.tryGetContext('CERTIFICATE_ARN');
 
 const createZone = app.node.tryGetContext('CREATE_HOSTED_ZONE') === 'true';
 const zoneId = app.node.tryGetContext('HOSTED_ZONE_ID');
-const zoneName = app.node.tryGetContext('DOMAIN_NAME') || 'rushabhpadalia.me';
+const zoneName = 'rushabhpadalia.me';
 
 console.log(`Environment Variables From CI/CD: ${rawDomainName}`);
 const domainName =  rawDomainName
@@ -54,6 +54,23 @@ if (isDeployCertificate) {
 
 }
 
+const isDeployZone = (deployTarget === 'all' || deployTarget === 'zone');
+console.log("Deploying Zone: ", isDeployZone);
+
+if (isDeployZone) {
+    console.log("Start Deploying Zone");
+
+    const zonestack = new ZoneStack(app, `ZoneStack`, {  
+        env: { 
+            account: account,
+            region: 'ap-southeast-2' 
+        },
+        environment: environment,
+        zoneName: zoneName
+    });
+
+}
+
 const isDeployWebsite = (deployTarget === 'all' || deployTarget === "website");
 console.log("Deploying Website: ", isDeployWebsite);
 
@@ -65,12 +82,10 @@ if (isDeployWebsite) {
             region: 'ap-southeast-2' 
         },
         certificateArn: certificateArn,
-        createZone: createZone,
-        zoneId: zoneId,
-        zoneName: zoneName,
         environment: environment,
         domainName:domainName,
         bucketName: bucketName,
+        zoneName: zoneName,
         crossRegionReferences: true // <-- Enable cross region references
 
     });
