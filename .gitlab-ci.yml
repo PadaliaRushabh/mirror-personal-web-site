@@ -112,37 +112,6 @@ deploy-zone:
       --context DEPLOY_TARGET=zone \
       --require-approval never
 
-# unit-test-job:   # This job runs in the test stage.
-#   stage: test
-#   image: python:3.10  # Specify the base Docker image with Python installed
-#   before_script:
-#     - python -V  # Display Python version for debugging purposes
-#     - pip install --upgrade pip  # Upgrade pip to the latest version
-#     - pip install tox  # Install tox
-#   script:
-#     - tox  # Run tox to execute the tests
-#   artifacts:
-#     when: always
-#     paths:
-#       - .tox/  # Store the Tox environment and results as artifacts
-#     expire_in: 1 week  # Define how long artifacts should be kept
-
-# Job to run CDK tests
-# cdk_test:
-  # stage: test
-  # before_script:
-  #   - npm install -g aws-cdk  # Install AWS CDK globally
-  #   - npm install  # Install dependencies
-  # script:
-  #   - npm run build  # Compile TypeScript to JavaScript (if applicable)
-  #   - npm test  # Run tests
-  # artifacts:
-  #   when: always
-  #   paths:
-  #     - coverage/  # If you generate coverage reports
-  #   expire_in: 1 week
-
-
 deploy-dev:
   stage: deploy-website-dev
   needs:
