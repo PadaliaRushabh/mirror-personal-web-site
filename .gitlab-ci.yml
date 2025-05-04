@@ -97,7 +97,6 @@ deploy-zone:
       when: always
   script:
     - echo "Checking whether to deploy hosted zone..."
-    - source zone.env
     - |
       if [ "$CREATE_ZONE" != "true" ]; then
         echo "Hosted zone already exists. Skipping deployment."
