@@ -28,7 +28,7 @@ before_script:
 
 stages:
   - build
-  - deploy_certificate
+  - deploy-certificate
   - deploy_dev
   - deploy_tst
   - deploy_prd
@@ -41,7 +41,7 @@ build-job:       # This job runs in the build stage, which runs first.
 
 # Deploy CertificateStack only when pushing to main
 deploy-certificate:
-  stage: deploy
+  stage: deploy-certificate
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
