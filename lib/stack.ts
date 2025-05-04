@@ -49,13 +49,10 @@ export class PersonalWebSiteStack extends cdk.Stack {
     // const hostedZone = new route53.HostedZone(this, `pws-HostedZone`, {
     //   zoneName: 'rushabhpadalia.me',
     // });
-    const hostedZone = isProd
-    ? new route53.HostedZone(this, 'MainZone', {
-        zoneName: 'rushabhpadalia.me',
-      })
-    : route53.HostedZone.fromLookup(this, 'ImportedZone', {
-        domainName: 'rushabhpadalia.me',
-      });
+ 
+    const hostedZone = route53.HostedZone.fromLookup(this, 'ImportedZone', {
+          domainName: 'rushabhpadalia.me'
+    });
       
     const certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCert', certArn);
 
