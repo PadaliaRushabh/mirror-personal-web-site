@@ -97,7 +97,6 @@ hostedzone-precheck:
   stage: hostedzone-precheck
   variables:
     DOMAIN_NAME: "rushabhpadalia.me"
-  image: amazon/aws-cli
   script:
     - |
       echo "Checking if hosted zone exists for $DOMAIN_NAME"
