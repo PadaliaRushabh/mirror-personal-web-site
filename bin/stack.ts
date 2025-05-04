@@ -12,6 +12,10 @@ const bucketName = app.node.tryGetContext('BUCKET_NAME');
 const deployTarget = app.node.tryGetContext('DEPLOY_TARGET') || 'all';
 const certificateArn = app.node.tryGetContext('CERTIFICATE_ARN');
 
+const createZone = app.node.tryGetContext('CREATE_HOSTED_ZONE') === 'true';
+const zoneId = app.node.tryGetContext('HOSTED_ZONE_ID');
+const zoneName = app.node.tryGetContext('DOMAIN_NAME') || 'rushabhpadalia.me';
+
 console.log(`Environment Variables From CI/CD: ${rawDomainName}`);
 const domainName =  rawDomainName
                         .split(',')
@@ -27,7 +31,10 @@ console.log("Environment Variables From CI/CD: ", {
     bucketName: bucketName,
     deployTarget:deployTarget,
     account:account,
-    certificateArn: certificateArn
+    certificateArn: certificateArn,
+    createZone: createZone,
+    zoneId: zoneId,
+    zoneName: zoneName
 });
 
 const isDeployCertificate = (deployTarget === 'all' || deployTarget === 'certificate');
@@ -58,6 +65,9 @@ if (isDeployWebsite) {
             region: 'ap-southeast-2' 
         },
         certificateArn: certificateArn,
+        createZone: createZone,
+        zoneId: zoneId,
+        zoneName: zoneName,
         environment: environment,
         domainName:domainName,
         bucketName: bucketName,

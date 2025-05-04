@@ -25,11 +25,6 @@ export class CertificateStack extends cdk.Stack {
       stringValue: this.certificate.certificateArn,
     });
 
-    const hostedZone = new route53.HostedZone(this, 'MainZone', {
-      zoneName: 'rushabhpadalia.me',
-    })
-    
-   
       // // Import existing SSL certificate
       // const certificateArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
       // this.certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);

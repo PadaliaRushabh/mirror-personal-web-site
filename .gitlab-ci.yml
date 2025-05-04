@@ -22,6 +22,7 @@ image:
 variables:
   NODE_ENV: 'dev'
   TS_NODE_PROJECT: './tsconfig.json'
+ 
 
 before_script:
   - apk add --no-cache curl unzip python3 py3-pip groff less
@@ -32,6 +33,7 @@ before_script:
 stages:
   - build
   - deploy-certificate
+  - hostedzone-precheck
   - deploy-website-dev
   - deploy-website-tst
   - deploy-website-prd
@@ -91,10 +93,37 @@ deploy-certificate:
   #     - coverage/  # If you generate coverage reports
   #   expire_in: 1 week
 
+hostedzone-precheck:
+  stage: hostedzone-precheck
+  variables:
+    DOMAIN_NAME: "rushabhpadalia.me"
+  image: amazon/aws-cli
+  script:
+    - |
+      echo "Checking if hosted zone exists for $DOMAIN_NAME"
+      ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+        --dns-name "$DOMAIN_NAME" \
+        --query "HostedZones[?Name == '${DOMAIN_NAME}.'] | [0].Id" \
+        --output text)
+      echo "ZONE_ID=$ZONE_ID"
+      if [ "$ZONE_ID" = "None" ]; then
+        echo "CREATE_ZONE=true" >> zone.env
+        echo "ZONE_ID=" >> zone.env
+      else
+        echo "CREATE_ZONE=false" >> zone.env
+        echo "ZONE_ID=$ZONE_ID" >> zone.env
+      fi
+  artifacts:
+    reports:
+      dotenv: zone.env
+    expire_in: 1 hour
+
 deploy-dev:
   stage: deploy-website-dev
+  needs:
+    - hostedzone-precheck
   script:
-    - echo "Deploying to DEV"
+    - echo "Deploying to DEV with CREATE_ZONE=$CREATE_ZONE, ZONE_ID=$ZONE_ID"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
@@ -105,8 +134,9 @@ deploy-dev:
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
       --context DEPLOY_TARGET=website \
+      --context CREATE_HOSTED_ZONE=$CREATE_ZONE \
+      --context HOSTED_ZONE_ID=$ZONE_ID \
       --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
-
   variables:
     ENVIRONMENT: "dev"
     BUCKET_NAME: "pws-dev"
@@ -119,9 +149,10 @@ deploy-dev:
 deploy-tst:
   stage: deploy-website-tst
   needs:
-    -  deploy-certificate
+    - deploy-certificate
+    - hostedzone-precheck
   script:
-    - echo "Deploying to TST"
+    - echo "Deploying to TST with CREATE_ZONE=$CREATE_ZONE, ZONE_ID=$ZONE_ID"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
@@ -132,6 +163,8 @@ deploy-tst:
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
       --context DEPLOY_TARGET=website \
+      --context CREATE_HOSTED_ZONE=$CREATE_ZONE \
+      --context HOSTED_ZONE_ID=$ZONE_ID \
       --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
   variables:
     ENVIRONMENT: "tst"
@@ -145,10 +178,11 @@ deploy-tst:
 deploy-prd:
   stage: deploy-website-prd
   needs:
-    -  deploy-certificate
-    -  deploy-tst
+    - deploy-certificate
+    - hostedzone-precheck
+    - deploy-tst
   script:
-    - echo "Deploying to PRD"
+    - echo "Deploying to PRD with CREATE_ZONE=$CREATE_ZONE, ZONE_ID=$ZONE_ID"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
@@ -159,6 +193,8 @@ deploy-prd:
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
       --context DEPLOY_TARGET=website \
+      --context CREATE_HOSTED_ZONE=$CREATE_ZONE \
+      --context HOSTED_ZONE_ID=$ZONE_ID \
       --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
   variables:
     ENVIRONMENT: "prd"

@@ -20,6 +20,9 @@ export class PersonalWebSiteStack extends cdk.Stack {
     const bucketName = props!.bucketName
     const domainName = props!.domainName
     const certArn = props!.certificateArn
+    const createZone = props!.createZone
+    const zoneId = props!.zoneId
+    const zoneName = props!.zoneName
     const isProd = environment === 'prd';
 
     // Create an S3 bucket for static website hosting
@@ -49,10 +52,25 @@ export class PersonalWebSiteStack extends cdk.Stack {
     // const hostedZone = new route53.HostedZone(this, `pws-HostedZone`, {
     //   zoneName: 'rushabhpadalia.me',
     // });
- 
-    const hostedZone = route53.HostedZone.fromLookup(this, 'ImportedZone', {
-          domainName: 'rushabhpadalia.me'
-    });
+
+    
+    let hostedZone: route53.IHostedZone;
+
+    if (createZone) {
+      hostedZone = new route53.HostedZone(this, 'CreatedZone', {
+        zoneName,
+      });
+      console.warn(`Created new hosted zone for: ${zoneName}`);
+    } else if (zoneId) {
+      hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'ImportedZone', {
+        hostedZoneId: zoneId,
+        zoneName,
+      });
+      console.log(`Using existing hosted zone: ${zoneId}`);
+    } else {
+      throw new Error('Hosted zone lookup failed and CREATE_HOSTED_ZONE is false — cannot continue.');
+    }
+
       
     const certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCert', certArn);
 
