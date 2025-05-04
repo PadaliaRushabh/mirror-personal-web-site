@@ -12,6 +12,7 @@ const bucketName = app.node.tryGetContext('BUCKET_NAME');
 const deployTarget = app.node.tryGetContext('DEPLOY_TARGET') || 'all';
 const certificateArn = app.node.tryGetContext('CERTIFICATE_ARN');
 
+console.log(`Environment Variables From CI/CD: ${rawDomainName}`);
 const domainName =  JSON.parse(rawDomainName || '[]');
 
 const account = process.env.CDK_DEFAULT_ACCOUNT; // Use the default AWS account from the environment
