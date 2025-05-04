@@ -19,6 +19,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     const environment = props!.environment
     const bucketName = props!.bucketName
     const domainName = props!.domainName
+    const certArn = props!.certificateArn
     const isProd = environment === 'prd';
 
     // Create an S3 bucket for static website hosting
@@ -55,8 +56,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     : route53.HostedZone.fromLookup(this, 'ImportedZone', {
         domainName: 'rushabhpadalia.me',
       });
-  
-    const certArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
+      
     const certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCert', certArn);
 
     const distribution = new Distribution(this, `pws-distribution-${environment}`, {

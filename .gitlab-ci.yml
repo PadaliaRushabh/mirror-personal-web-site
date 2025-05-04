@@ -101,7 +101,9 @@ deploy-dev:
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
-      --context DEPLOY_TARGET=website 
+      --context DEPLOY_TARGET=website \
+      --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
+
   variables:
     ENVIRONMENT: "dev"
     BUCKET_NAME: "pws-dev"
@@ -126,7 +128,8 @@ deploy-tst:
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
-      --context DEPLOY_TARGET=website
+      --context DEPLOY_TARGET=website \
+      --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
   variables:
     ENVIRONMENT: "tst"
     BUCKET_NAME: "pws-staging"
@@ -152,7 +155,8 @@ deploy-prd:
       --context ENVIRONMENT=$ENVIRONMENT \
       --context BUCKET_NAME=$BUCKET_NAME \
       --context DOMAIN_NAME=$DOMAIN_NAME \
-      --context DEPLOY_TARGET=website
+      --context DEPLOY_TARGET=website \
+      --context CERTIFICATE_ARN=$(aws ssm get-parameter --name /shared/certificate/arn --region us-east-1 --query 'Parameter.Value' --output text)
   variables:
     ENVIRONMENT: "prd"
     BUCKET_NAME: "pws-prd"

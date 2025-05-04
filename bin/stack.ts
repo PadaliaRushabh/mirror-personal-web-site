@@ -10,6 +10,7 @@ const environment = app.node.tryGetContext('ENVIRONMENT'); // returns 'dev', 'ts
 const rawDomainName = app.node.tryGetContext('DOMAIN_NAME');
 const bucketName = app.node.tryGetContext('BUCKET_NAME');
 const deployTarget = app.node.tryGetContext('DEPLOY_TARGET') || 'all';
+const certificateArn = app.node.tryGetContext('CERTIFICATE_ARN');
 
 const domainName =  JSON.parse(rawDomainName || '[]');
 
@@ -21,7 +22,8 @@ console.log("Environment Variables From CI/CD: ", {
     domainName: domainName,
     bucketName: bucketName,
     deployTarget:deployTarget,
-    account:account
+    account:account,
+    certificateArn: certificateArn
 });
 
 const isDeployCertificate = (deployTarget === 'all' || deployTarget === 'certificate');
@@ -51,6 +53,7 @@ if (isDeployWebsite) {
             account: account,
             region: 'ap-southeast-2' 
         },
+        certificateArn: certificateArn,
         environment: environment,
         domainName:domainName,
         bucketName: bucketName,
