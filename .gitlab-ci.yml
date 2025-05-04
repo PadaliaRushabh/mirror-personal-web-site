@@ -163,7 +163,7 @@ deploy-prd:
   variables:
     ENVIRONMENT: "prd"
     BUCKET_NAME: "pws-prd"
-    DOMAIN_NAME: "rushabhpadalia.me , www.rushabhpadalia.me"
+    DOMAIN_NAME: 'rushabhpadalia.me,www.rushabhpadalia.me'
   environment:
     name: prd
   rules:
