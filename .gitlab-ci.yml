@@ -30,7 +30,7 @@ before_script:
   - npm install
 
 stages:
-  - buildS
+  - build
   - deploy-certificate
   - deploy-website-dev
   - deploy-website-tst
