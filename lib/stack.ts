@@ -17,6 +17,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
     const environment = props!.environment
     const bucketName = props!.bucketName
     const domainName = props!.domainName
+    const certificate = props!.certificate
     const isProd = environment === 'prd';
 
     // Create an S3 bucket for static website hosting
@@ -70,7 +71,7 @@ export class PersonalWebSiteStack extends cdk.Stack {
               responseHttpStatus: 200
           }
       ], 
-      certificate: CERTIFICATE
+      certificate: certificate
     })
 
     // const stagingdistribution = new Distribution(this, `pws-distribution-staging`, {

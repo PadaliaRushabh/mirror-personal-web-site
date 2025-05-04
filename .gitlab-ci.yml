@@ -29,9 +29,9 @@ before_script:
 stages:
   - build
   - deploy-certificate
-  - deploy_dev
-  - deploy_tst
-  - deploy_prd
+  - deploy-website-dev
+  - deploy-website-tst
+  - deploy-website-prd
 
 
 build-job:       # This job runs in the build stage, which runs first.
@@ -42,6 +42,8 @@ build-job:       # This job runs in the build stage, which runs first.
 # Deploy CertificateStack only when pushing to main
 deploy-certificate:
   stage: deploy-certificate
+  needs:
+    - build-job
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
@@ -51,8 +53,6 @@ deploy-certificate:
         --context ENVIRONMENT=prd \
         --context DEPLOY_TARGET=certificate \
         --require-approval never
-
-
 
 # unit-test-job:   # This job runs in the test stage.
 #   stage: test
@@ -85,7 +85,7 @@ deploy-certificate:
   #   expire_in: 1 week
 
 deploy-dev:
-  stage: deploy_dev
+  stage: deploy-website-dev
   script:
     - echo "Deploying to DEV"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -108,7 +108,9 @@ deploy-dev:
     - if: '$CI_COMMIT_BRANCH =~ /^dev\//'
 
 deploy-tst:
-  stage: deploy_tst
+  stage: deploy-website-tst
+  needs:
+    -  deploy-certificate
   script:
     - echo "Deploying to TST"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -131,7 +133,10 @@ deploy-tst:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
 deploy-prd:
-  stage: deploy_prd
+  stage: deploy-website-prd
+  needs:
+    -  deploy-certificate
+    -  deploy-tst
   script:
     - echo "Deploying to PRD"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -154,5 +159,3 @@ deploy-prd:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: manual
       allow_failure: false
-  needs:
-    - deploy-tst
