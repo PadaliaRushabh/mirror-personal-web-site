@@ -20,7 +20,9 @@ console.log("Environment Variables From CI/CD: ", {
     environment: environment,
     rawDomainName: rawDomainName,
     domainName: domainName,
-    bucketName: bucketName
+    bucketName: bucketName,
+    deployTarget:deployTarget,
+    account:account
 });
 
 let certificate: certmgr.ICertificate | undefined;
