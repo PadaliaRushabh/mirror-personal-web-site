@@ -16,12 +16,13 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-image: mesosphere/aws-cli
+image: 
+  name: mesosphere/aws-cli
+  entrypoint: [""]
 
 variables:
   NODE_ENV: 'dev'
   TS_NODE_PROJECT: './tsconfig.json'
-
 
 before_script:
   - npm install
