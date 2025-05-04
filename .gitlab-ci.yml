@@ -33,8 +33,7 @@ before_script:
 stages:
   - build
   - deploy-certificate
-  - hostedzone-precheck
-  - deploy-zone
+  - hostedzone
   - deploy-website-dev
   - deploy-website-tst
   - deploy-website-prd
@@ -65,14 +64,14 @@ deploy-certificate:
       --require-approval never
 
 hostedzone-precheck:
-  stage: hostedzone-precheck
+  stage: hostedzone
   variables:
     DOMAIN_NAME: "rushabhpadalia.me"
   script:
     - |
       echo "Checking if hosted zone exists for $DOMAIN_NAME"
       ZONE_ID=$(aws route53 list-hosted-zones-by-name \
-        --dns-name "$DOMAIN_NAME" \x
+        --dns-name "$DOMAIN_NAME" \
         --query "HostedZones[?Name == '${DOMAIN_NAME}.'] | [0].Id" \
         --output text)
       echo "ZONE_ID=$ZONE_ID"
@@ -89,7 +88,7 @@ hostedzone-precheck:
     expire_in: 1 hour
 
 deploy-zone:
-  stage: deploy-zone
+  stage: hostedzone
   needs:
     - build-job
     - hostedzone-precheck
