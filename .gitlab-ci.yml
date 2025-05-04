@@ -110,7 +110,7 @@ deploy-dev:
   variables:
     ENVIRONMENT: "dev"
     BUCKET_NAME: "pws-dev"
-    DOMAIN_NAME: '["dev.rushabhpadalia.me"]'
+    DOMAIN_NAME: "dev.rushabhpadalia.me"
   environment:
     name: dev
   rules:
@@ -136,7 +136,7 @@ deploy-tst:
   variables:
     ENVIRONMENT: "tst"
     BUCKET_NAME: "pws-staging"
-    DOMAIN_NAME: '["staging.rushabhpadalia.me"]'
+    DOMAIN_NAME: "staging.rushabhpadalia.me"
   environment:
     name: tst
   rules:
@@ -163,7 +163,7 @@ deploy-prd:
   variables:
     ENVIRONMENT: "prd"
     BUCKET_NAME: "pws-prd"
-    DOMAIN_NAME:  "[\"rushabhpadalia.me\", \"www.rushabhpadalia.me\"]"
+    DOMAIN_NAME: "rushabhpadalia.me , www.rushabhpadalia.me"
   environment:
     name: prd
   rules:

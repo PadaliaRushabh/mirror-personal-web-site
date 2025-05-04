@@ -7,13 +7,16 @@ import {CertificateStack} from '../lib/certificatestack';
 const app = new cdk.App();
 
 const environment = app.node.tryGetContext('ENVIRONMENT'); // returns 'dev', 'tst', or 'prd'
-const rawDomainName = app.node.tryGetContext('DOMAIN_NAME');
+const rawDomainName = app.node.tryGetContext('DOMAIN_NAME') || "";
 const bucketName = app.node.tryGetContext('BUCKET_NAME');
 const deployTarget = app.node.tryGetContext('DEPLOY_TARGET') || 'all';
 const certificateArn = app.node.tryGetContext('CERTIFICATE_ARN');
 
 console.log(`Environment Variables From CI/CD: ${rawDomainName}`);
-const domainName =  JSON.parse(rawDomainName || '[]');
+const domainName =  rawDomainName
+                        .split(',')
+                        .map((s: string) => s.trim())
+                        .filter((s: string) => s.length > 0);
 
 const account = process.env.CDK_DEFAULT_ACCOUNT; // Use the default AWS account from the environment
 
