@@ -9,6 +9,8 @@ import { BlockPublicAccess, BucketAccessControl } from "aws-cdk-lib/aws-s3";
 import {AllowedMethods, Distribution, OriginAccessIdentity, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {S3Origin} from "aws-cdk-lib/aws-cloudfront-origins";
 import {CustomStackProps} from "../bin/stackprops"
+import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
 
 export class PersonalWebSiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CustomStackProps) {
@@ -17,7 +19,6 @@ export class PersonalWebSiteStack extends cdk.Stack {
     const environment = props!.environment
     const bucketName = props!.bucketName
     const domainName = props!.domainName
-    const certificate = props!.certificate
     const isProd = environment === 'prd';
 
     // Create an S3 bucket for static website hosting
@@ -54,6 +55,9 @@ export class PersonalWebSiteStack extends cdk.Stack {
     : route53.HostedZone.fromLookup(this, 'ImportedZone', {
         domainName: 'rushabhpadalia.me',
       });
+  
+    const certArn = ssm.StringParameter.valueForStringParameter(this, '/shared/certificate/arn');
+    const certificate = certmgr.Certificate.fromCertificateArn(this, 'ImportedCert', certArn);
 
     const distribution = new Distribution(this, `pws-distribution-${environment}`, {
       defaultBehavior: {

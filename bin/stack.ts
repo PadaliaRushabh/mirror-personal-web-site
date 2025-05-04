@@ -2,8 +2,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PersonalWebSiteStack } from '../lib/stack';
 import {CertificateStack} from '../lib/certificatestack';
-import * as ssm from 'aws-cdk-lib/aws-ssm';
-import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
+
 
 const app = new cdk.App();
 
@@ -25,9 +24,12 @@ console.log("Environment Variables From CI/CD: ", {
     account:account
 });
 
-let certificate: certmgr.ICertificate | undefined;
+const isDeployCertificate = (deployTarget === 'all' || deployTarget === 'certificate');
+console.log("Deploying Certificate: ", isDeployCertificate);
 
-if (deployTarget === 'all' || deployTarget === 'certificate') {
+if (isDeployCertificate) {
+    console.log("Start Deploying Certificate");
+
     const certificatestack = new CertificateStack(app, `CertificateStack`, {  
         env: { 
             account: account,
@@ -36,29 +38,19 @@ if (deployTarget === 'all' || deployTarget === 'certificate') {
         environment: environment,
         crossRegionReferences: true // <-- Enable cross region references
     });
-    certificate = certificatestack.certificate;
 
-} else if (deployTarget === 'website') {
-
-    const certArn = ssm.StringParameter.valueForStringParameter(app, '/shared/certificate/arn');
-    certificate = certmgr.Certificate.fromCertificateArn(app, 'ImportedCert', certArn);
-
-} else{
-
-    throw new Error('Not Supported Deploy Target');
 }
 
-const isDeployWebsite = ((deployTarget === 'all' || deployTarget === "website") && certificate);
+const isDeployWebsite = (deployTarget === 'all' || deployTarget === "website");
 console.log("Deploying Website: ", isDeployWebsite);
 
 if (isDeployWebsite) {
-    console.log("Deploying Website");
+    console.log("Start Deploying Website");
     new PersonalWebSiteStack(app, `PersonalWebSiteStack-${environment}`, {
         env: { 
             account: account,
             region: 'ap-southeast-2' 
         },
-        certificate: certificate,
         environment: environment,
         domainName:domainName,
         bucketName: bucketName,
