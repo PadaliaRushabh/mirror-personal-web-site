@@ -99,7 +99,7 @@ deploy-zone:
     - echo "Checking whether to deploy hosted zone..."
     - |
       if [ "$CREATE_ZONE" != "true" ]; then
-        echo "Hosted zone already exists. Skipping deployment."
+        echo "Hosted zone exists. Skipping deployment."
         exit 0
       fi
     - echo "Deploying ZoneStack"
@@ -115,8 +115,13 @@ deploy-zone:
 deploy-dev:
   stage: deploy-website-dev
   needs:
-    - deploy-zone
+    - hostedzone-precheck
   script:
+    - |
+      if [ "$CREATE_ZONE" == "true" ]; then
+        echo "Hosted zone does not exists. Skipping deployment."
+        exit 1
+      fi
     - echo "Deploying to DEV with CREATE_ZONE=$CREATE_ZONE, ZONE_ID=$ZONE_ID"
     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
