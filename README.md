@@ -61,6 +61,75 @@ Static files are deployed to the respective S3 buckets using the `BucketDeployme
   - Invalidation: Invalidates all paths (`/*`) on the staging CloudFront distribution
 
 
+## Photo gallery
+
+`gallery.html` shows photos with a title and description. It is fully serverless:
+
+```
+you ──upload──▶ S3 photos bucket (uploads/) ──event──▶ Lambda (photo_gallery)
+                                                         │ resizes, strips EXIF/GPS
+                                                         ▼
+            gallery.html ◀── CloudFront /photos/* ◀── photos/photos.json + web-sized images
+```
+
+### Add a photo
+
+Each photo gets a caption file with the **same name**:
+
+```
+sunset-at-bondi.jpg
+sunset-at-bondi.json
+```
+
+```json
+{
+  "title": "Sunset at Bondi",
+  "description": "Shot on a winter evening.\nNew lines are kept.",
+  "date": "2026-07-01"
+}
+```
+
+All fields are optional. Without a caption file the title comes from the filename
+(`sunset-at-bondi` → "Sunset at bondi"). `date` (YYYY-MM-DD) is shown in the viewer and
+controls the order (newest first); photos without one are ordered by upload time.
+The upload date of the photo file is always shown too (editing only the `.json` doesn't change it;
+replacing the photo does).
+
+Upload both files to `uploads/` (bucket name is in the `PhotosBucketName` stack output):
+
+```bash
+BUCKET=$(aws cloudformation describe-stacks --stack-name PersonalWebSiteStack-prd \
+  --query "Stacks[0].Outputs[?OutputKey=='PhotosBucketName'].OutputValue" --output text)
+
+aws s3 cp sunset-at-bondi.json "s3://$BUCKET/uploads/"
+aws s3 cp sunset-at-bondi.jpg  "s3://$BUCKET/uploads/"
+
+# or keep a local folder in sync (add --delete to also remove photos you deleted locally)
+aws s3 sync ./gallery "s3://$BUCKET/uploads/"
+```
+
+The gallery updates within about a minute. Supported formats: JPG, PNG, WebP
+(convert iPhone HEIC photos to JPG first).
+
+- **Change a title/description:** edit the `.json` and upload it again.
+- **Replace a photo:** upload a new file with the same name.
+- **Remove a photo:** `aws s3 rm "s3://$BUCKET/uploads/sunset-at-bondi.jpg"` (and its `.json`).
+
+### Bucket layout
+
+| Prefix | Written by | Public? |
+| --- | --- | --- |
+| `uploads/` | you — originals + caption files | No |
+| `photos/<name>/<version>/thumb.webp`, `large.webp` | Lambda | Yes, via CloudFront |
+| `photos/photos.json` | Lambda — the list the page reads | Yes, via CloudFront |
+| `meta/` | Lambda — image sizes | No |
+
+Originals (and the GPS location inside them) are never served. The photos bucket is
+**retained** if the stack is deleted, so your photos are never lost by a redeploy.
+
+The Lambda's Python dependency (Pillow) is bundled by `cdk deploy` using the local
+`python3 -m pip` (falls back to Docker if pip is unavailable).
+
 ## Update Namecheap DNS
 The domain is purchased via namecheap. In the Namecheap account, update the nameservers to point to the AWS Route 53 nameservers. This will connect domain to the Route 53 hosted zone.
 
