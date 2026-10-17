@@ -26,13 +26,19 @@ export class PhotoGallery extends Construct {
   constructor(scope: Construct, id: string, props: PhotoGalleryProps) {
     super(scope, id);
 
-    // Your photos live here. RETAIN so deleting/redeploying the stack never deletes them.
+    // Your photos live here. prd: RETAIN so photos survive stack deletion; dev/tst: cleaned up with the stack.
+    const isProd = props.environment === 'prd';
+
     this.bucket = new s3.Bucket(this, 'PhotosBucket', {
+      // e.g. pws-photos-dev-123456789012 (account ID keeps it globally unique)
+      bucketName: `pws-photos-${props.environment}-${cdk.Stack.of(this).account}`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       enforceSSL: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: isProd ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: !isProd,   // empties dev/tst bucket on stack delete
     });
+
 
     const lambdaDir = path.resolve('./resources/lambdas/photo_gallery');
 
