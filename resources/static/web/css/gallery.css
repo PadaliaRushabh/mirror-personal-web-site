@@ -1,0 +1,208 @@
+/* ==========================================================================
+   Gallery page — loaded after resume.css, only on gallery.html
+   ========================================================================== */
+
+.gallery-section {
+  min-height: 100vh;
+}
+
+.gallery-intro {
+  max-width: 38rem;
+  margin-bottom: 2.5rem;
+}
+
+.gallery-status {
+  color: #6c757d;
+  font-size: 1.05rem;
+}
+
+/* Grid: as many ~260px columns as fit; tiles share one crop so rows line up */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem 1.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.gallery-item,
+.gallery-item figure {
+  margin: 0;
+}
+
+.gallery-thumb {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #e9ecef;           /* shows while the photo loads */
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.gallery-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+}
+
+.gallery-thumb:hover img,
+.gallery-thumb:focus-visible img {
+  transform: scale(1.03);
+}
+
+.gallery-thumb:focus-visible {
+  outline: 3px solid #BD5D38;
+  outline-offset: 3px;
+}
+
+.gallery-item figcaption {
+  margin-top: .65rem;
+  font-family: 'Saira Extra Condensed', sans-serif;
+  font-weight: 500;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: #343a40;
+}
+
+.gallery-title {
+  display: block;
+}
+
+.gallery-uploaded {
+  display: block;
+  margin-top: .2rem;
+  font-family: 'Open Sans', sans-serif;
+  font-size: .85rem;
+  font-weight: 400;
+  color: #6c757d;
+}
+
+/* Lightbox ---------------------------------------------------------------- */
+.lightbox {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #1a1a1a;
+  color: #e9ecef;
+  outline: none;                  /* the dialog itself takes focus on open */
+}
+
+.lightbox::backdrop {
+  background: #1a1a1a;
+}
+
+.lightbox[open] {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.lightbox-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 3.5rem 1rem 1rem;
+}
+
+.lightbox-stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lightbox-caption {
+  padding: 0 1.25rem 1.5rem;
+  max-width: 46rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.lightbox-title {
+  margin: 0 0 .25rem;
+  font-family: 'Saira Extra Condensed', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  text-transform: none;
+  color: #fff;
+}
+
+.lightbox-meta {
+  font-size: .9rem;
+  color: #adb5bd;
+  margin-bottom: .5rem;
+}
+
+.lightbox-description {
+  margin: 0;
+  white-space: pre-line;          /* keep line breaks from the caption file */
+  line-height: 1.6;
+}
+
+.lightbox-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.lightbox-btn:hover {
+  background: #BD5D38;
+}
+
+.lightbox-btn:focus-visible {
+  outline: 3px solid #BD5D38;
+  outline-offset: 2px;
+}
+
+.lightbox-close { top: .5rem; right: .5rem; }
+.lightbox-prev  { left: .75rem;  top: 50%; transform: translateY(-50%); }
+.lightbox-next  { right: .75rem; top: 50%; transform: translateY(-50%); }
+
+/* Phones: arrows sit under the photo instead of over it (swipe also works) */
+@media (max-width: 575.98px) {
+  .lightbox-prev,
+  .lightbox-next {
+    top: auto;
+    bottom: .5rem;
+    transform: none;
+  }
+  .lightbox-stage {
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .lightbox-stage {
+    padding: 3.5rem 5rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-thumb img {
+    transition: none;
+  }
+  .gallery-thumb:hover img,
+  .gallery-thumb:focus-visible img {
+    transform: none;
+  }
+}

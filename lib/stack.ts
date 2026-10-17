@@ -11,6 +11,7 @@ import {S3Origin} from "aws-cdk-lib/aws-cloudfront-origins";
 import {CustomStackProps} from "../bin/stackprops"
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as certmgr from 'aws-cdk-lib/aws-certificatemanager';
+import {PhotoGallery} from './photogallery';
 
 export class PersonalWebSiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: CustomStackProps) {
@@ -65,6 +66,21 @@ export class PersonalWebSiteStack extends cdk.Stack {
       ], 
       certificate: certificate
     })
+
+    // Photo gallery: photos bucket + processing Lambda, served at /photos/* on the same domain
+    const gallery = new PhotoGallery(this, `pws-photo-gallery-${environment}`, {environment});
+
+    distribution.addBehavior('/photos/*', new S3Origin(gallery.bucket, {originAccessIdentity: originAccess}), {
+      viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
+      cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+      compress: true,
+    });
+
+    new cdk.CfnOutput(this, 'PhotosBucketName', {
+      value: gallery.bucket.bucketName,
+      description: 'Upload photos + captions to s3://<this bucket>/uploads/',
+    });
 
     // Deploy static files to the S3 bucket
     new s3deploy.BucketDeployment(this, `bucket-deploy-pws-${environment}`, {

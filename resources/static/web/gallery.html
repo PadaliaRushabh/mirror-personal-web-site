@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Photos by Rushabh Padalia.">
+    <meta name="author" content="Rushabh Padalia">
+
+    <title>Gallery · Rushabh Padalia</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Saira+Extra+Condensed:wght@500;700&display=swap">
+    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="css/resume.css">
+    <link rel="stylesheet" href="css/gallery.css">
+
+  </head>
+
+  <body id="page-top">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" id="sideNav">
+      <a class="navbar-brand" href="index.html">
+        <span class="d-block d-lg-none">Rushabh Padalia</span>
+        <span class="d-none d-lg-block">
+          <img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="img/profile.jpeg" alt="Rushabh Padalia" width="160" height="160">
+        </span>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#experience">Experience</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#skills">Skills</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#education">Education</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html#interests">Interests</a></li>
+          <li class="nav-item"><a class="nav-link active" href="gallery.html" aria-current="page">Gallery</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container-fluid p-0">
+      <section class="resume-section resume-section-first gallery-section p-3 p-lg-5" id="gallery">
+        <h2 class="mb-3">Gallery</h2>
+        <p class="gallery-intro">Photos from my treks, camping trips and travels.</p>
+
+        <p class="gallery-status" id="galleryStatus" role="status">Loading photos…</p>
+        <ul class="gallery-grid" id="galleryGrid"></ul>
+      </section>
+    </main>
+
+    <dialog class="lightbox" id="lightbox" aria-labelledby="lightboxTitle" tabindex="-1">
+      <div class="lightbox-stage" id="lightboxStage">
+        <img id="lightboxImg" alt="">
+        <button type="button" class="lightbox-btn lightbox-close" id="lightboxClose" aria-label="Close">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="lightbox-btn lightbox-prev" id="lightboxPrev" aria-label="Previous photo">
+          <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="lightbox-btn lightbox-next" id="lightboxNext" aria-label="Next photo">
+          <i class="fa fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="lightbox-caption">
+        <h3 class="lightbox-title" id="lightboxTitle"></h3>
+        <div class="lightbox-meta" id="lightboxMeta"></div>
+        <p class="lightbox-description" id="lightboxDescription"></p>
+      </div>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Gallery: reads photos/photos.json, which the photo Lambda rebuilds after every upload -->
+    <script>
+      (function () {
+        'use strict';
+
+        var MANIFEST_URL = 'photos/photos.json';
+
+        var grid = document.getElementById('galleryGrid');
+        var status = document.getElementById('galleryStatus');
+        var box = document.getElementById('lightbox');
+        var boxImg = document.getElementById('lightboxImg');
+        var boxTitle = document.getElementById('lightboxTitle');
+        var boxMeta = document.getElementById('lightboxMeta');
+        var boxDesc = document.getElementById('lightboxDescription');
+        var prevBtn = document.getElementById('lightboxPrev');
+        var nextBtn = document.getElementById('lightboxNext');
+
+        var photos = [];
+        var current = -1;
+        var opener = null;
+
+        // "2026-07-01" (date taken, from the caption file) or "2026-10-17T05:12:34+00:00" (upload time).
+        function formatDate(iso, month) {
+          if (!iso) return '';
+          var d = new Date(iso.length === 10 ? iso + 'T00:00:00' : iso);
+          return isNaN(d) ? '' : d.toLocaleDateString('en-AU', { day: 'numeric', month: month || 'long', year: 'numeric' });
+        }
+
+        function render() {
+          var frag = document.createDocumentFragment();
+          photos.forEach(function (photo, i) {
+            var li = document.createElement('li');
+            var fig = document.createElement('figure');
+            var btn = document.createElement('button');
+            var img = document.createElement('img');
+            var cap = document.createElement('figcaption');
+
+            li.className = 'gallery-item';
+            btn.type = 'button';
+            btn.className = 'gallery-thumb';
+            btn.setAttribute('aria-label', 'Open “' + photo.title + '”');
+            btn.addEventListener('click', function () { open(i, btn); });
+
+            img.src = photo.thumb.src;
+            img.width = photo.thumb.width;
+            img.height = photo.thumb.height;
+            img.alt = photo.title;
+            img.loading = i < 6 ? 'eager' : 'lazy';
+            img.decoding = 'async';
+
+            var title = document.createElement('span');
+            title.className = 'gallery-title';
+            title.textContent = photo.title;
+            cap.appendChild(title);
+
+            var uploaded = formatDate(photo.uploaded, 'short');
+            if (uploaded) {
+              var when = document.createElement('time');
+              when.className = 'gallery-uploaded';
+              when.dateTime = photo.uploaded;
+              when.textContent = 'Uploaded ' + uploaded;
+              cap.appendChild(when);
+            }
+
+            btn.appendChild(img);
+            fig.appendChild(btn);
+            fig.appendChild(cap);
+            li.appendChild(fig);
+            frag.appendChild(li);
+          });
+          grid.appendChild(frag);
+        }
+
+        function show(i) {
+          current = (i + photos.length) % photos.length;
+          var photo = photos[current];
+
+          // Show the already-loaded thumbnail straight away, then swap in the large version.
+          boxImg.src = photo.thumb.src;
+          boxImg.alt = photo.title;
+          var large = new Image();
+          large.onload = function () {
+            if (photos[current] === photo) boxImg.src = photo.large.src;
+          };
+          large.src = photo.large.src;
+
+          boxTitle.textContent = photo.title;
+          var taken = formatDate(photo.date);
+          var uploadedOn = formatDate(photo.uploaded);
+          var meta = [taken && 'Taken ' + taken, uploadedOn && 'Uploaded ' + uploadedOn];
+          if (photos.length > 1) meta.push((current + 1) + ' of ' + photos.length);
+          boxMeta.textContent = meta.filter(Boolean).join('  ·  ');
+          boxDesc.textContent = photo.description || '';
+          boxDesc.hidden = !photo.description;
+
+          prevBtn.hidden = nextBtn.hidden = photos.length < 2;
+
+          // Preload the next photo so arrowing through feels instant.
+          if (photos.length > 1) new Image().src = photos[(current + 1) % photos.length].large.src;
+
+          history.replaceState(null, '', '#' + encodeURIComponent(photo.id));
+        }
+
+        function open(i, fromEl) {
+          opener = fromEl || null;
+          show(i);
+          if (!box.open) {
+            box.showModal();
+            box.focus();  // focus the viewer, not the close button, so no stray focus ring
+            document.documentElement.style.overflow = 'hidden';
+          }
+        }
+
+        box.addEventListener('close', function () {
+          document.documentElement.style.overflow = '';
+          history.replaceState(null, '', location.pathname + location.search);
+          if (opener) opener.focus();
+        });
+
+        document.getElementById('lightboxClose').addEventListener('click', function () { box.close(); });
+        prevBtn.addEventListener('click', function () { show(current - 1); });
+        nextBtn.addEventListener('click', function () { show(current + 1); });
+
+        // Click on the dark area around the photo closes it.
+        document.getElementById('lightboxStage').addEventListener('click', function (e) {
+          if (e.target === e.currentTarget) box.close();
+        });
+
+        box.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); show(current + 1); }
+        });
+
+        // Swipe left/right on phones.
+        var touchX = null;
+        box.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+        box.addEventListener('touchend', function (e) {
+          if (touchX === null || photos.length < 2) return;
+          var dx = e.changedTouches[0].clientX - touchX;
+          touchX = null;
+          if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+        });
+
+        fetch(MANIFEST_URL, { cache: 'no-cache' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            photos = (data && data.photos) || [];
+            if (!photos.length) {
+              status.textContent = 'No photos yet.';
+              return;
+            }
+            status.hidden = true;
+            render();
+
+            // Open a shared link like gallery.html#sunset straight to that photo.
+            var wanted = decodeURIComponent(location.hash.slice(1));
+            var idx = photos.findIndex(function (p) { return p.id === wanted; });
+            if (idx >= 0) open(idx, grid.querySelectorAll('.gallery-thumb')[idx]);
+          })
+          .catch(function () {
+            // Before the first upload photos.json doesn't exist yet.
+            status.textContent = 'No photos yet.';
+          });
+
+        // Close the mobile menu after tapping a link.
+        $('#sideNav .nav-link, #sideNav .navbar-brand').on('click', function () {
+          $('#navbarSupportedContent').collapse('hide');
+        });
+      })();
+    </script>
+
+  </body>
+
+</html>
