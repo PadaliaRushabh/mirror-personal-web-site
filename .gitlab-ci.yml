@@ -17,7 +17,7 @@
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
 image: 
-  name: node:18-alpine 
+  name: node:22-alpine 
 
 variables:
   NODE_ENV: 'dev'
