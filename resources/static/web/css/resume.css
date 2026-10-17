@@ -1,59 +1,185 @@
-/*!
- * Start Bootstrap - Resume v4.0.0-beta.2 (https://startbootstrap.com/template-overviews/resume)
- * Copyright 2013-2017 Start Bootstrap
- * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-resume/blob/master/LICENSE)
- */
+/* ==========================================================================
+   rushabhpadalia.me — resume styles (mobile-first)
+   Replaces css/resume.min.css
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Open Sans', serif;
-  padding-top: 54px;
-  color: #868e96; }
+  font-family: 'Open Sans', sans-serif;
+  padding-top: 56px;            /* height of the fixed top navbar on small screens */
+  color: #6c757d;               /* was #868e96 — darker for readable contrast */
+  overflow-x: hidden;
+}
 
-@media (min-width: 992px) {
-  body {
-    padding-top: 0;
-    padding-left: 17rem; } }
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Saira Extra Condensed', serif;
+/* Headings ---------------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Saira Extra Condensed', sans-serif;
   font-weight: 700;
   text-transform: uppercase;
-  color: #343a40; }
+  color: #343a40;
+}
 
+/* Fluid sizes: shrink smoothly on phones instead of a fixed 6rem/3.5rem */
 h1 {
-  font-size: 6rem;
-  line-height: 5.5rem; }
+  font-size: clamp(3rem, 12vw, 6rem);
+  line-height: 0.95;
+}
 
 h2 {
-  font-size: 3.5rem; }
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+}
 
 .subheading {
   text-transform: uppercase;
   font-weight: 500;
-  font-family: 'Saira Extra Condensed', serif;
-  font-size: 1.35rem; }
+  font-family: 'Saira Extra Condensed', sans-serif;
+  font-size: 1.35rem;
+}
 
-.list-social-icons a {
-  color: #495057; }
-  .list-social-icons a:hover {
-    color: #BD5D38; }
-  .list-social-icons a .fa-lg {
-    font-size: 1.75rem; }
+/* Long email address must be able to wrap on narrow phones */
+.subheading a {
+  overflow-wrap: anywhere;
+}
 
-.list-icons {
-  font-size: 3rem; }
-  .list-icons .list-inline-item i:hover {
-    color: #BD5D38; }
+/* Colours ----------------------------------------------------------------- */
+.bg-primary   { background-color: #BD5D38 !important; }
+.text-primary { color: #BD5D38 !important; }
+
+a { color: #BD5D38; }
+a:hover, a:focus, a:active { color: #824027; }
+
+/* Side / top navigation --------------------------------------------------- */
+#sideNav .navbar-brand {
+  font-family: 'Saira Extra Condensed', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
 
 #sideNav .navbar-nav .nav-item .nav-link {
   font-weight: 600;
-  text-transform: uppercase; }
+  text-transform: uppercase;
+}
 
+/* Sections ---------------------------------------------------------------- */
+.resume-section {
+  border-bottom: 1px solid #dee2e6;
+  scroll-margin-top: 56px;      /* anchor links don't hide headings under the fixed navbar */
+}
+
+.resume-section:last-child {
+  border-bottom: 0;
+}
+
+.resume-item .resume-date {
+  white-space: nowrap;
+}
+
+/* Social icons (row on every screen size) */
+.list-social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.list-social-icons .list-inline-item {
+  margin: 0;
+}
+
+.list-social-icons a {
+  color: #495057;
+}
+
+.list-social-icons a:hover,
+.list-social-icons a:focus {
+  color: #BD5D38;
+}
+
+.list-social-icons a .fa-lg {
+  font-size: 1.75rem;
+}
+
+/* Skill icons: a wrapping grid instead of one tall column on phones */
+.list-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 1.25rem;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.list-icons .list-inline-item {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+}
+
+.list-icons .list-inline-item i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 64px;
+  max-height: 64px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform .15s ease;
+}
+
+.list-icons .list-inline-item i:hover {
+  transform: scale(1.1);
+}
+
+/* Skill icon images */
+.icon-python-plain         { background-image: url(../img/python.svg); }
+.icon-typescript-plain     { background-image: url(../img/typescript.svg); }
+.icon-aws-plain            { background-image: url(../img/aws.svg); }
+.icon-stepfunction-plain   { background-image: url(../img/aws_step_functions.svg); }
+.icon-pandas-plain         { background-image: url(../img/pandas.svg); }
+.icon-spark-plain          { background-image: url(../img/apache_spark.svg); }
+.icon-dynamodb-plain       { background-image: url(../img/aws_dynamodb.svg); }
+.icon-postgresql-plain     { background-image: url(../img/postgresql.svg); }
+.icon-gitlab-plain         { background-image: url(../img/gitlab.svg); }
+.icon-cloudformation-plain { background-image: url(../img/aws_cloudformation.svg); }
+.icon-docker-plain         { background-image: url(../img/docker.svg); }
+
+/* Visually-hidden text for screen readers */
+.sr-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Tablet and up ----------------------------------------------------------- */
+@media (min-width: 768px) {
+  .resume-item .resume-date {
+    padding-left: 2rem;
+  }
+}
+
+/* Desktop: fixed sidebar -------------------------------------------------- */
 @media (min-width: 992px) {
+  body {
+    padding-top: 0;
+    padding-left: 17rem;
+  }
+
   #sideNav {
     text-align: center;
     position: fixed;
@@ -62,162 +188,52 @@ h2 {
     display: flex;
     flex-direction: column;
     width: 17rem;
-    height: 100vh; }
-    #sideNav .navbar-brand {
-      display: flex;
-      margin: auto auto 0;
-      padding: 0.5rem; }
-      #sideNav .navbar-brand .img-profile {
-        max-width: 10rem;
-        max-height: 10rem;
-        border: 0.5rem solid rgba(255, 255, 255, 0.2); }
-    #sideNav .navbar-collapse {
-      display: flex;
-      align-items: flex-start;
-      flex-grow: 0;
-      width: 100%;
-      margin-bottom: auto; }
-      #sideNav .navbar-collapse .navbar-nav {
-        flex-direction: column;
-        width: 100%; }
-        #sideNav .navbar-collapse .navbar-nav .nav-item {
-          display: block; }
-          #sideNav .navbar-collapse .navbar-nav .nav-item .nav-link {
-            display: block; } }
+    height: 100vh;
+  }
 
-
-@media (min-width: 768px) {
-  section.resume-section-first {
-    min-height: 100vh; }
-    section.resume-section-first .resume-item .resume-date {
-      min-width: 18rem; } }
-
-@media (min-width: 768px) {
-  section.resume-section {
-    min-height: 55vh; }
-    section.resume-section .resume-item .resume-date {
-      min-width: 18rem; } }
-
-section.resume-section.resume-section-first {
-  border-bottom: 1px solid #dee2e6;
-  padding-top: 5rem !important;
-  padding-bottom: 5rem !important; }
-  section.resume-section .resume-item .resume-date {
-    min-width: none; }
-
-@media (min-width: 992px) {
-  section.resume-section.resume-section-first {
-    padding-top: 3rem !important;
-    padding-bottom: 3rem !important; } }
-
-.bg-primary {
-  background-color: #BD5D38 !important; }
-
-.text-primary {
-  color: #BD5D38 !important; }
-
-a {
-  color: #BD5D38; }
-  a:hover, a:focus, a:active {
-    color: #824027; }
-
-
-/* Add more custom icons here */
-
-.list-inline {
-    padding-left: 0;
-    list-style-type: none;
-    margin: 0;
+  #sideNav .navbar-brand {
     display: flex;
-    gap: 10px; /* Space between icons */
-}
-
-/* .list-inline-item {
-    display: inline-block;
-} */
-
-
-/* Styling for list items */
-.list-inline-item {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 48px; /* Fixed width for icons */
-  height: 72px; /* Fixed height for icons */
-}
-
-/* Make icons responsive */
-.list-inline-item i {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* Media query for small screens */
-@media (max-width: 600px) {
-  .list-inline-item {
-      flex: 1 1 48px; /* Allows items to grow and shrink while keeping a minimum width */
-      max-width: 100%; /* Ensures items don’t overflow container */
+    margin: auto auto 0;
+    padding: .5rem;
   }
-  .list-inline {
-      flex-direction: column; /* Stack items vertically */
-      align-items: center; /* Center items horizontally */
+
+  #sideNav .navbar-brand .img-profile {
+    max-width: 10rem;
+    max-height: 10rem;
+    border: .5rem solid rgba(255, 255, 255, .2);
+  }
+
+  #sideNav .navbar-collapse {
+    display: flex;
+    align-items: flex-start;
+    flex-grow: 0;
+    width: 100%;
+    margin-bottom: auto;
+  }
+
+  #sideNav .navbar-collapse .navbar-nav {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  #sideNav .navbar-collapse .navbar-nav .nav-item,
+  #sideNav .navbar-collapse .navbar-nav .nav-item .nav-link {
+    display: block;
+  }
+
+  .resume-section {
+    scroll-margin-top: 0;
+  }
+
+  /* Only the intro fills the screen, and only on desktop */
+  .resume-section-first {
+    min-height: 100vh;
   }
 }
 
-
-mt-auto, .my-auto {
-  margin-top: 0 !important;
+/* Wide desktop: give the date column a fixed width so dates line up ------- */
+@media (min-width: 1200px) {
+  .resume-item .resume-date {
+    min-width: 14rem;
+  }
 }
-
-.icon-aws-plain {
-    background-image: url('../img/aws.svg');
-}
-
-.icon-dynamodb-plain {
-  background-image: url('../img/aws_dynamodb.svg');
-}
-
-.icon-pandas-plain {
-  background-image: url('../img/pandas.svg');
-}
-
-.icon-spark-plain {
-  background-image: url('../img/apache_spark.svg');
-}
-
-.icon-cloudformation-plain {
-  background-image: url('../img/aws_cloudformation.svg');
-}
-
-.icon-stepfunction-plain {
-  background-image: url('../img/aws_step_functions.svg');
-}
-
-.icon-docker-plain {
-  background-image: url('../img/docker.svg');
-}
-
-.icon-gitlab-plain {
-  background-image: url('../img/gitlab.svg');
-}
-
-.icon-postgresql-plain {
-  background-image: url('../img/postgresql.svg');
-}
-
-.icon-python-plain {
-  background-image: url('../img/python.svg');
-}
-
-.icon-typescript-plain {
-  background-image: url('../img/typescript.svg');
-}
-
-
-
